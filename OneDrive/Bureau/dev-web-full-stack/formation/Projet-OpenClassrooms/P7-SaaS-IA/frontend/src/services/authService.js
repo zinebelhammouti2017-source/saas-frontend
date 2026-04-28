@@ -33,3 +33,23 @@ export async function connecterUtilisateur(donnees) {
 
   return data;
 }
+
+import { recupererToken } from "@/utils/cookies";
+
+export async function getProfile() {
+  const token = recupererToken();
+
+  const reponse = await fetch("http://localhost:8000/auth/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const donnees = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donnees.message || "Impossible de récupérer le profil utilisateur");
+  }
+
+  return donnees.data.user;
+}
