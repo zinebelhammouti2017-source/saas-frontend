@@ -7,3 +7,18 @@
 body {
   font-family: Arial, sans-serif;
 }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.contenu {
+  flex: 1;
+}

@@ -25,7 +25,11 @@ export default function LoginPage() {
         password: motDePasse,
       });
 
-      document.cookie = `token=${reponse.data.token}; path=/;`;
+      document.cookie = `token=${reponse.data.token}; path=/; max-age=3600; SameSite=Strict`;
+      // Stockage du token dans un cookie avec sécurité renforcée
+      // max-age=3600 → expiration du token après 1 heure
+      // SameSite=Strict → protection contre les attaques CSRF (Cross-Site Request Forgery)
+      // En production, on privilégierait un cookie HttpOnly et Secure côté backend
 
       console.log("Connexion réussie :", reponse);
 
