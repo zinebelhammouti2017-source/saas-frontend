@@ -1,0 +1,89 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(247, 247, 247, 0.92);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 70px;
+  z-index: 1000;
+}
+
+.modal {
+  position: relative;
+  width: 680px;
+  min-height: 620px;
+  padding: 72px 82px;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 36px;
+  right: 36px;
+  border: none;
+  background: transparent;
+  font-size: 32px;
+  font-weight: 300;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.modal h2 {
+  margin: 0 0 48px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field label {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.field input,
+.field select {
+  height: 54px;
+  padding: 0 18px;
+  border: 1px solid #dcdfe4;
+  border-radius: 4px;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+
+
+.submitButton {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+/* bouton désactivé */
+.disabled {
+  background-color: #d3d3d3;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* bouton actif */
+.active {
+  background-color: black;
+  color: white;
+}
