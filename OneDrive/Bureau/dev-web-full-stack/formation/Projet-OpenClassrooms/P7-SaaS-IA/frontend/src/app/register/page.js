@@ -3,6 +3,7 @@
 import { useState } from "react";
 import styles from "../auth.module.css";
 import { inscrireUtilisateur } from "@/services/authService";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
   const [nom, setNom] = useState("");
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [motDePasse, setMotDePasse] = useState("");
   const [messageErreur, setMessageErreur] = useState("");
   const [messageSucces, setMessageSucces] = useState("");
+  const router = useRouter();
 
   async function gererInscription(evenement) {
     evenement.preventDefault();
@@ -30,6 +32,11 @@ export default function RegisterPage() {
       setNom("");
       setEmail("");
       setMotDePasse("");
+
+       document.cookie = `token=${reponse.data.token}; path=/; max-age=3600; SameSite=Strict`;
+
+      router.push("/profile"); // Redirection automatique après succès
+
     } catch (erreur) {
       setMessageErreur(erreur.message);
     }
@@ -66,7 +73,7 @@ export default function RegisterPage() {
               onChange={(e) => setMotDePasse(e.target.value)}
             />
 
-            <button type="submit">S'inscrire</button>
+            <button type="submit" > S'inscrire </button>
           </form>
 
           {messageErreur && (

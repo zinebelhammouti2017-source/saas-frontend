@@ -75,8 +75,13 @@ export default function ProjectsPage() {
           <p className={styles.empty}>Aucun projet pour le moment</p>
         ) : (
         <div className={styles.grid}>
-  {projets.map((projet) => (
-    <div key={projet.id} className={styles.card}>
+  
+         {projets.map((projet) => (
+        <div
+          key={projet.id}
+          className={styles.card}
+          onClick={() => router.push(`/projects/${projet.id}`)}
+  >
       
       {/* HEADER */}
       <h2 className={styles.title}>{projet.name}</h2>

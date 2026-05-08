@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { recupererToken } from "@/utils/cookies";
-import { getProfile } from "@/services/authService";
+import { getProfile, modifierProfil, modifierMotDePasse, } from "@/services/profileService";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,7 +16,10 @@ export default function ProfilePage() {
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState("");
   const [modeEdition, setModeEdition] = useState(false);
+  const [motDePasseActuel, setMotDePasseActuel] = useState("");
+  const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
 
+  // 🔥 Charger le profil au chargement de la page
   useEffect(() => {
     async function chargerProfil() {
       const token = recupererToken();
@@ -39,6 +42,42 @@ export default function ProfilePage() {
     chargerProfil();
   }, [router]);
 
+  // 🔥 Fonction pour sauvegarder les modifications
+  async function gererModification() {
+    
+    if (
+      (motDePasseActuel && !nouveauMotDePasse) ||
+      (!motDePasseActuel && nouveauMotDePasse)
+       ) {
+      setErreur("Veuillez renseigner l'ancien et le nouveau mot de passe.");
+      return;
+     }
+
+
+    try {
+      const reponse = await modifierProfil({
+        name: utilisateur.name,
+        email: utilisateur.email,
+      });
+
+      if (motDePasseActuel && nouveauMotDePasse) {
+      await modifierMotDePasse({
+      currentPassword: motDePasseActuel,
+      newPassword: nouveauMotDePasse,
+      });
+    }
+
+      console.log("Profil modifié :", reponse);
+      setMotDePasseActuel("");
+      setNouveauMotDePasse("");
+      setModeEdition(false); // sortir du mode édition
+
+    } catch (erreur) {
+      console.error("Erreur modification :", erreur);
+      setErreur("Erreur lors de la modification.");
+    }
+  }
+
   if (chargement) {
     return <p>Chargement du profil...</p>;
   }
@@ -59,6 +98,8 @@ export default function ProfilePage() {
           </div>
 
           <div className={styles.form}>
+
+            {/* NOM */}
             <div className={styles.field}>
               <label htmlFor="name">Nom</label>
               <input
@@ -75,6 +116,7 @@ export default function ProfilePage() {
               />
             </div>
 
+            {/* EMAIL */}
             <div className={styles.field}>
               <label htmlFor="email">Email</label>
               <input
@@ -91,22 +133,49 @@ export default function ProfilePage() {
               />
             </div>
 
-            <div className={styles.field}>
-              <label htmlFor="password">Mot de passe</label>
-              <input
-                id="password"
-                type="password"
-                value="************"
-                readOnly
-              />
-            </div>
+            {/* MOT DE PASSE (lecture seule) */}
+          {modeEdition ? (
+  <>
+    <div className={styles.field}>
+      <label htmlFor="currentPassword">Mot de passe actuel</label>
+      <input
+        id="currentPassword"
+        type="password"
+        value={motDePasseActuel}
+        onChange={(e) => setMotDePasseActuel(e.target.value)}
+      />
+    </div>
 
+    <div className={styles.field}>
+      <label htmlFor="newPassword">Nouveau mot de passe</label>
+      <input
+        id="newPassword"
+        type="password"
+        value={nouveauMotDePasse}
+        onChange={(e) => setNouveauMotDePasse(e.target.value)}
+      />
+    </div>
+  </>
+) : (
+  <div className={styles.field}>
+    <label htmlFor="password">Mot de passe</label>
+    <input id="password" type="password" value="************" readOnly />
+  </div>
+)}
+            {/* BOUTON */}
             <button
               className={styles.button}
-              onClick={() => setModeEdition(!modeEdition)}
+              onClick={() => {
+                if (modeEdition) {
+                  gererModification(); // 🔥 sauvegarde API
+                } else {
+                  setModeEdition(true); // 🔥 passe en mode édition
+                }
+              }}
             >
               {modeEdition ? "Enregistrer" : "Modifier les informations"}
             </button>
+
           </div>
         </section>
       </main>
