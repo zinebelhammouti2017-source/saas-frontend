@@ -8,6 +8,7 @@ import { getProfile, modifierProfil, modifierMotDePasse, } from "@/services/prof
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import styles from "./profile.module.css";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function ProfilePage() {
   const [modeEdition, setModeEdition] = useState(false);
   const [motDePasseActuel, setMotDePasseActuel] = useState("");
   const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
+  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
 
   // 🔥 Charger le profil au chargement de la page
   useEffect(() => {
@@ -136,25 +138,47 @@ export default function ProfilePage() {
             {/* MOT DE PASSE (lecture seule) */}
           {modeEdition ? (
   <>
-    <div className={styles.field}>
-      <label htmlFor="currentPassword">Mot de passe actuel</label>
-      <input
-        id="currentPassword"
-        type="password"
-        value={motDePasseActuel}
-        onChange={(e) => setMotDePasseActuel(e.target.value)}
-      />
-    </div>
+  <div className={styles.field}>
+  <label htmlFor="currentPassword">Mot de passe actuel</label>
 
-    <div className={styles.field}>
-      <label htmlFor="newPassword">Nouveau mot de passe</label>
-      <input
-        id="newPassword"
-        type="password"
-        value={nouveauMotDePasse}
-        onChange={(e) => setNouveauMotDePasse(e.target.value)}
-      />
-    </div>
+  <div className={styles.passwordWrapper}>
+    <input
+      id="currentPassword"
+      type={afficherMotDePasse ? "text" : "password"}
+      value={motDePasseActuel}
+      onChange={(e) => setMotDePasseActuel(e.target.value)}
+    />
+
+    <button
+      type="button"
+      className={styles.eyeButton}
+      onClick={() => setAfficherMotDePasse(!afficherMotDePasse)}
+    >
+      {afficherMotDePasse ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
+
+<div className={styles.field}>
+  <label htmlFor="newPassword">Nouveau mot de passe</label>
+
+  <div className={styles.passwordWrapper}>
+    <input
+      id="newPassword"
+      type={afficherMotDePasse ? "text" : "password"}
+      value={nouveauMotDePasse}
+      onChange={(e) => setNouveauMotDePasse(e.target.value)}
+    />
+
+    <button
+      type="button"
+      className={styles.eyeButton}
+      onClick={() => setAfficherMotDePasse(!afficherMotDePasse)}
+    >
+      {afficherMotDePasse ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
+</div>
   </>
 ) : (
   <div className={styles.field}>
