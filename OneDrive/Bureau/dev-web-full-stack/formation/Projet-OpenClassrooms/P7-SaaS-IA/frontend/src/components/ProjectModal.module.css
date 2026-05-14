@@ -87,3 +87,54 @@
   background-color: black;
   color: white;
 }
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  border: 1px solid #eeeeee;
+  border-radius: 6px;
+  padding: 8px;
+  background-color: #ffffff;
+}
+
+.resultItem {
+  border: none;
+  background-color: #f7f7f7;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.resultItem:hover {
+  background-color: #eeeeee;
+}
+
+.selectedContributors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.contributorTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  background-color: #ffe3d3;
+  color: #d85a00;
+  font-size: 12px;
+}
+
+.contributorTag button {
+  border: none;
+  background: transparent;
+  color: #d85a00;
+  cursor: pointer;
+  font-size: 14px;
+}

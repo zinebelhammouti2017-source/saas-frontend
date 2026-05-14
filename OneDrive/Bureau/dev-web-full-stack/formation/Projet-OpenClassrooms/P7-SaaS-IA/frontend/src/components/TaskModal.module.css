@@ -1,0 +1,175 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  overflow-y: auto;
+  padding: 40px 20px;
+}
+
+.modal {
+  position: relative;
+  width: 598px;
+  min-height: 799px;
+  background-color: #ffffff;
+  padding: 72px 72px;
+  border-radius: 2px;
+  border: 1px solid #e5e5e5;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.closeButton {
+  position: absolute;
+  top: 32px;
+  right: 34px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 26px;
+  font-weight: 300;
+  cursor: pointer;
+}
+
+.modal h2 {
+  margin: 0 0 42px;
+  font-size: 24px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label,
+.statusSection p {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid #dcdfe4;
+  border-radius: 4px;
+  background-color: #ffffff;
+  font-size: 13px;
+  color: #6b7280;
+  box-sizing: border-box;
+}
+
+.statusSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.statusList {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.todo,
+.progress,
+.done {
+  padding: 6px 14px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.todo {
+  background-color: #ffe1e1;
+  color: #ef6b6b;
+}
+
+.progress {
+  background-color: #fff0c7;
+  color: #d28a00;
+}
+
+.done {
+  background-color: #dff8e8;
+  color: #1aa35f;
+}
+
+.submitButton {
+  width: fit-content;
+  margin-top: 26px;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 8px;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  font-size: 15px;
+  cursor: not-allowed;
+}
+
+.statusButton {
+  border: none;
+  cursor: pointer;
+}
+
+.activeTodo {
+  background-color: #ffbdbd;
+  color: #e13b3b;
+}
+
+.activeProgress {
+  background-color: #ffd98a;
+  color: #b86f00;
+}
+
+.activeDone {
+  background-color: #bdf3d0;
+  color: #12884c;
+}
+
+.submitButtonActive {
+  background-color: #1f1f1f;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.selectedAssignees {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.assigneeTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  background-color: #edf0f2;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.assigneeTag button {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+}

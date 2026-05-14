@@ -42,3 +42,26 @@ export async function creerProjet({ name, description, contributors }) {
 
   return donneesApi.data;
 }
+
+export async function recupererProjetParId(projectId) {
+  const token = recupererToken();
+
+  const reponse = await fetch(
+    `http://localhost:8000/projects/${projectId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(
+      donneesApi.message || "Impossible de récupérer le projet"
+    );
+  }
+
+  return donneesApi.data.project;
+}
