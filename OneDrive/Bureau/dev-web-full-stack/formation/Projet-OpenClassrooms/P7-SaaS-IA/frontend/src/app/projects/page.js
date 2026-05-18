@@ -52,6 +52,16 @@ export default function ProjectsPage() {
     return <p>{erreur}</p>;
   }
 
+  function obtenirInitiales(nom) {
+  if (!nom) return "?";
+
+  return nom
+    .split(" ")
+    .map((mot) => mot[0])
+    .join("")
+    .toUpperCase();
+}
+
   return (
     <div className={styles.page}>
       <Header />
@@ -103,15 +113,24 @@ export default function ProjectsPage() {
 
       {/* ÉQUIPE */}
       <div className={styles.teamSection}>
-        <p className={styles.teamTitle}>Équipe (3)</p>
+        <p className={styles.teamTitle}>
+         Équipe ({1 + (projet.members?.length || 0)})
+        </p>
 
-        <div className={styles.teamMembers}>
-          <span className={styles.avatar}>AD</span>
-          <span className={styles.role}>Propriétaire</span>
-          <span className={styles.avatar}>BC</span>
-          <span className={styles.avatar}>CV</span>
-        </div>
-      </div>
+       <div className={styles.teamMembers}>
+         <span className={styles.avatar}>
+          {obtenirInitiales(projet.owner?.name)}
+         </span>
+
+         <span className={styles.role}>Propriétaire</span>
+
+         {projet.members?.map((membre) => (
+         <span key={membre.id} className={styles.avatar}>
+        {obtenirInitiales(membre.user?.name)}
+         </span>
+      ))}
+       </div>
+      </div>  
 
     </div>
   ))}

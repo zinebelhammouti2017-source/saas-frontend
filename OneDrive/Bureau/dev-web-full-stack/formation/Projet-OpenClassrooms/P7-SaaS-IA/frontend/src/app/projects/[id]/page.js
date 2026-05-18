@@ -8,6 +8,7 @@ import { recupererTachesProjet } from "@/services/taskService";
 import styles from "./projectDetail.module.css";
 import TaskModal from "@/components/TaskModal";
 import { recupererProjetParId } from "@/services/projectService";
+import { creerCommentaire } from "@/services/commentService";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -18,6 +19,8 @@ export default function ProjectDetailPage() {
   const [chargement, setChargement] = useState(true);
   const [erreur, setErreur] = useState("");
   const [modalTacheOuverte, setModalTacheOuverte] = useState(false);
+  const [commentairesOuverts, setCommentairesOuverts] = useState({});
+  const [nouveauxCommentaires, setNouveauxCommentaires] = useState({});
 
   useEffect(() => {
     async function chargerTaches() {
@@ -70,6 +73,38 @@ function getClasseStatut(statut) {
       return styles.badgeDone;
     default:
       return styles.badge;
+  }
+}
+
+function toggleCommentaires(taskId) {
+  setCommentairesOuverts({
+    ...commentairesOuverts,
+    [taskId]: !commentairesOuverts[taskId],
+  });
+}
+
+async function gererAjoutCommentaire(taskId) {
+  try {
+    const contenu = nouveauxCommentaires[taskId];
+
+    if (!contenu?.trim()) return;
+
+    await creerCommentaire({
+      projectId: id,
+      taskId,
+      content: contenu,
+    });
+
+    const tachesApi = await recupererTachesProjet(id);
+    setTaches(tachesApi);
+
+    setNouveauxCommentaires({
+      ...nouveauxCommentaires,
+      [taskId]: "",
+    });
+
+  } catch (erreur) {
+    console.error("Erreur ajout commentaire :", erreur);
   }
 }
 
@@ -152,10 +187,17 @@ function getClasseStatut(statut) {
           ) : (
             taches.map((tache) => (
               <div key={tache.id} className={styles.taskCard}>
-                <h3>{tache.title}</h3>
-                <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
+                <div className={styles.taskTop}>
+                  <div>
+                  <h3>{tache.title}</h3>
+
+                  <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
                   {traduireStatut(tache.status)}
-                </span>
+                  </span>
+                  </div>
+
+                  <button className={styles.moreButton}>...</button>
+                </div> 
 
                 <p>{tache.description}</p>
 
@@ -170,24 +212,76 @@ function getClasseStatut(statut) {
               </p>
 
               <div className={styles.assignees}>
-  <p>Assigné à :</p>
+                <p>Assigné à :</p>
 
-  {tache.assignees?.map((assignation) => (
-    <div key={assignation.id} className={styles.assigneeItem}>
-      <span className={styles.assigneeAvatar}>
-        {assignation.user.name
-          .split(" ")
-          .map((mot) => mot[0])
-          .join("")
-          .toUpperCase()}
-      </span>
+                {tache.assignees?.map((assignation) => (
+               <div key={assignation.id} className={styles.assigneeItem}>
+                <span className={styles.assigneeAvatar}>
+                  {assignation.user.name
+                  .split(" ")
+                  .map((mot) => mot[0])
+                  .join("")
+                  .toUpperCase()}
+                </span>
 
-      <span className={styles.assigneeName}>
-        {assignation.user.name}
-      </span>
+                <span className={styles.assigneeName}>
+                  {assignation.user.name}
+                </span>
+              </div>
+           ))}
+            
+          </div>
+<button
+  type="button"
+  className={styles.commentsRow}
+  onClick={() => toggleCommentaires(tache.id)}
+>
+  <p>Commentaires ({tache.comments?.length || 0})</p>
+  <span>{commentairesOuverts[tache.id] ? "⌃" : "⌄"}</span>
+</button>
+
+{commentairesOuverts[tache.id] && (
+  <div className={styles.commentsContent}>
+    {tache.comments?.length > 0 ? (
+      tache.comments.map((commentaire) => (
+        <div key={commentaire.id} className={styles.commentItem}>
+          <p className={styles.commentAuthor}>
+            {commentaire.author.name}
+          </p>
+
+          <p className={styles.commentText}>
+            {commentaire.content}
+          </p>
+        </div>
+      ))
+    ) : (
+      <p className={styles.noComment}>
+        Aucun commentaire pour le moment.
+      </p>
+    )}
+
+    <div className={styles.commentForm}>
+      <input
+        type="text"
+        placeholder="Ajouter un commentaire..."
+        value={nouveauxCommentaires[tache.id] || ""}
+        onChange={(e) =>
+          setNouveauxCommentaires({
+            ...nouveauxCommentaires,
+            [tache.id]: e.target.value,
+          })
+        }
+      />
+
+      <button
+        type="button"
+        onClick={() => gererAjoutCommentaire(tache.id)}
+      >
+        Envoyer
+      </button>
     </div>
-  ))}
-</div>
+  </div>
+)}
               </div>
             ))
           )}
