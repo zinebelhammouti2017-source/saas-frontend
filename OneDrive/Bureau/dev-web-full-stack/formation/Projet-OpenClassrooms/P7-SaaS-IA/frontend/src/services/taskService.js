@@ -1,9 +1,19 @@
 import { recupererToken } from "@/utils/cookies";
 
-export async function creerTache({ projectId, assigneeIds, title, description, priority, dueDate }) {
+const API_URL = "http://localhost:8000";
+
+export async function creerTache({
+  projectId,
+  assigneeIds,
+  title,
+  description,
+  status,
+  priority,
+  dueDate,
+}) {
   const token = recupererToken();
 
-  const reponse = await fetch(`http://localhost:8000/projects/${projectId}/tasks`, {
+  const reponse = await fetch(`${API_URL}/projects/${projectId}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -13,13 +23,13 @@ export async function creerTache({ projectId, assigneeIds, title, description, p
       assigneeIds,
       title,
       description,
+      status,
       priority,
       dueDate,
     }),
   });
 
   const donneesApi = await reponse.json();
-  console.log("Réponse création tâche :", donneesApi);
 
   if (!reponse.ok) {
     throw new Error(donneesApi.message || "Erreur création tâche");
@@ -28,10 +38,66 @@ export async function creerTache({ projectId, assigneeIds, title, description, p
   return donneesApi.data;
 }
 
+export async function modifierTache({
+  projectId,
+  taskId,
+  assigneeIds,
+  title,
+  description,
+  status,
+  priority,
+  dueDate,
+}) {
+  const token = recupererToken();
+
+  const reponse = await fetch(`${API_URL}/projects/${projectId}/tasks/${taskId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      assigneeIds,
+      title,
+      description,
+      status,
+      priority,
+      dueDate,
+    }),
+  });
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur modification tâche");
+  }
+
+  return donneesApi.data;
+}
+
+export async function supprimerTache({ projectId, taskId }) {
+  const token = recupererToken();
+
+  const reponse = await fetch(`${API_URL}/projects/${projectId}/tasks/${taskId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur suppression tâche");
+  }
+
+  return donneesApi;
+}
+
 export async function recupererTachesProjet(idProjet) {
   const token = recupererToken();
 
-  const reponse = await fetch(`http://localhost:8000/projects/${idProjet}/tasks`, {
+  const reponse = await fetch(`${API_URL}/projects/${idProjet}/tasks`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -47,4 +113,3 @@ export async function recupererTachesProjet(idProjet) {
 
   return donneesApi.data.tasks;
 }
-

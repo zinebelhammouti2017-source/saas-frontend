@@ -356,3 +356,39 @@
   cursor: pointer;
 }
 
+.taskMenuWrapper {
+  position: relative;
+}
+
+.taskMenu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: 150px;
+  background-color: #ffffff;
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(20, 20, 20, 0.08);
+  padding: 8px;
+  z-index: 20;
+}
+
+.taskMenu button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.taskMenu button:hover {
+  background-color: #f8f5f2;
+}
+
+.deleteAction {
+  color: #d64545;
+}
+

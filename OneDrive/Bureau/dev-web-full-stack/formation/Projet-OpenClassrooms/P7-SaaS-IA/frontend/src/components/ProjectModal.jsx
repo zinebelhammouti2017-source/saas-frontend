@@ -1,18 +1,22 @@
 import { useState } from "react";
-import { creerProjet } from "@/services/projectService";
+import { creerProjet, modifierProjet } from "@/services/projectService";
 import { rechercherUtilisateurs } from "@/services/userService";
 import styles from "./ProjectModal.module.css";
 
-export default function ProjectModal({ onClose, onProjetCree }) {
-  const [titre, setTitre] = useState("");
-  const [description, setDescription] = useState("");
+export default function ProjectModal({ onClose, onProjetCree, projetAModifier }) {
+  const [titre, setTitre] = useState(projetAModifier?.name || "");
+  const [description, setDescription] = useState(
+    projetAModifier?.description || ""
+  );
   const [recherche, setRecherche] = useState("");
   const [resultats, setResultats] = useState([]);
-  const [contributeurs, setContributeurs] = useState([]);
+  const [contributeurs, setContributeurs] = useState(
+    projetAModifier?.members?.map((membre) => membre.user) || []
+  );
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(false);
 
-  const formulaireValide = titre && description;
+  const formulaireValide = titre.trim() && description.trim();
 
   async function gererRechercheUtilisateur(valeur) {
     setRecherche(valeur);
@@ -25,7 +29,7 @@ export default function ProjectModal({ onClose, onProjetCree }) {
     try {
       const utilisateurs = await rechercherUtilisateurs(valeur);
       setResultats(utilisateurs);
-    } catch (erreur) {
+    } catch {
       setErreur("Impossible de rechercher les utilisateurs.");
     }
   }
@@ -35,9 +39,7 @@ export default function ProjectModal({ onClose, onProjetCree }) {
       (contributeur) => contributeur.email === utilisateur.email
     );
 
-    if (dejaAjoute) {
-      return;
-    }
+    if (dejaAjoute) return;
 
     setContributeurs([...contributeurs, utilisateur]);
     setRecherche("");
@@ -50,20 +52,29 @@ export default function ProjectModal({ onClose, onProjetCree }) {
     );
   }
 
-  async function gererCreationProjet(e) {
+  async function gererEnvoiProjet(e) {
     e.preventDefault();
 
     setErreur("");
     setChargement(true);
 
     try {
-      const nouveauProjet = await creerProjet({
+      const donneesProjet = {
         name: titre,
         description,
         contributors: contributeurs.map((contributeur) => contributeur.email),
-      });
+      };
 
-      onProjetCree(nouveauProjet);
+      if (projetAModifier) {
+        await modifierProjet({
+          projectId: projetAModifier.id,
+          ...donneesProjet,
+        });
+      } else {
+        await creerProjet(donneesProjet);
+      }
+
+      await onProjetCree();
       onClose();
     } catch (erreur) {
       setErreur(erreur.message);
@@ -75,13 +86,13 @@ export default function ProjectModal({ onClose, onProjetCree }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={onClose}>
+        <button type="button" className={styles.closeButton} onClick={onClose}>
           ×
         </button>
 
-        <h2>Créer un projet</h2>
+        <h2>{projetAModifier ? "Modifier le projet" : "Créer un projet"}</h2>
 
-        <form className={styles.form} onSubmit={gererCreationProjet}>
+        <form className={styles.form} onSubmit={gererEnvoiProjet}>
           <div className={styles.field}>
             <label htmlFor="title">Titre*</label>
             <input
@@ -130,7 +141,10 @@ export default function ProjectModal({ onClose, onProjetCree }) {
             {contributeurs.length > 0 && (
               <div className={styles.selectedContributors}>
                 {contributeurs.map((contributeur) => (
-                  <span key={contributeur.email} className={styles.contributorTag}>
+                  <span
+                    key={contributeur.email}
+                    className={styles.contributorTag}
+                  >
                     {contributeur.name}
                     <button
                       type="button"
@@ -145,13 +159,19 @@ export default function ProjectModal({ onClose, onProjetCree }) {
           </div>
 
           <button
+            type="submit"
+            disabled={!formulaireValide || chargement}
             className={`${styles.submitButton} ${
               formulaireValide ? styles.active : styles.disabled
             }`}
-            type="submit"
-            disabled={!formulaireValide || chargement}
           >
-            {chargement ? "Création..." : "Ajouter un projet"}
+            {chargement
+              ? projetAModifier
+                ? "Modification..."
+                : "Création..."
+              : projetAModifier
+              ? "Enregistrer les modifications"
+              : "Ajouter un projet"}
           </button>
 
           {erreur && <p>{erreur}</p>}

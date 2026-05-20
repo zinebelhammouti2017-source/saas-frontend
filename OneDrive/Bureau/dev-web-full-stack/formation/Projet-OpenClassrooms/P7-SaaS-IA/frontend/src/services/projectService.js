@@ -65,3 +65,34 @@ export async function recupererProjetParId(projectId) {
 
   return donneesApi.data.project;
 }
+
+export async function modifierProjet({
+  projectId,
+  name,
+  description,
+  contributors,
+}) {
+  const token = recupererToken();
+
+  const reponse = await fetch(`http://localhost:8000/projects/${projectId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      name,
+      description,
+      contributors,
+    }),
+  });
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur modification projet");
+  }
+
+  return donneesApi.data;
+}
+

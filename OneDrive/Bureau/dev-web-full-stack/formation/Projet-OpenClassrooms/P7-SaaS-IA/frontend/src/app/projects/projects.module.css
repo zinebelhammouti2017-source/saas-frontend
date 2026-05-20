@@ -139,3 +139,48 @@
   gap: 18px;
 }
 
+.card {
+  position: relative;
+}
+
+.cardHeader {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
+
+.moreButton {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.projectMenu {
+  position: absolute;
+  top: 34px;
+  right: 0;
+
+  width: 130px;
+  padding: 8px;
+
+  background-color: #ffffff;
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(20, 20, 20, 0.08);
+  z-index: 20;
+}
+
+.projectMenu button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px 12px;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.projectMenu button:hover {
+  background-color: #f8f5f2;
+}

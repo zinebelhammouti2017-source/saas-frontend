@@ -1,5 +1,8 @@
+import { recupererToken } from "@/utils/cookies";
+const API_URL = "http://localhost:8000";
+
 export async function inscrireUtilisateur(donneesUtilisateur) {
-  const reponse = await fetch("http://localhost:8000/auth/register", {
+  const reponse = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +20,7 @@ export async function inscrireUtilisateur(donneesUtilisateur) {
 }
 
 export async function connecterUtilisateur(donnees) {
-  const reponse = await fetch("http://localhost:8000/auth/login", {
+  const reponse = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -34,7 +37,26 @@ export async function connecterUtilisateur(donnees) {
   return data;
 }
 
-import { recupererToken } from "@/utils/cookies";
+
+
+export async function recupererProfil() {
+  const token = recupererToken();
+
+  const reponse = await fetch(`${API_URL}/auth/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Impossible de récupérer le profil");
+  }
+
+  return donneesApi.data;
+}
+
 
 
 

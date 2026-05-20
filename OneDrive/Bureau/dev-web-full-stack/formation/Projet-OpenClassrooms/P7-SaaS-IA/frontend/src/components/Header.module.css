@@ -49,4 +49,66 @@
   font-size: 12px;
   font-weight: 600;
   color: #ffffff;
+   border: none;
+  cursor: pointer;
+}
+
+.userMenu {
+  position: relative;
+}
+
+
+
+.dropdown {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  z-index: 50;
+
+  width: 170px;
+  padding: 8px;
+
+  background: #ffffff;
+  border: 1px solid #ececf1;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(20, 20, 20, 0.08);
+}
+
+.dropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown button:hover {
+  background-color: #f8f5f2;
+}
+
+.userArea {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background-color: #1f1f1f;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
 }

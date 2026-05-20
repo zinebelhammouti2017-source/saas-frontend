@@ -24,3 +24,8 @@ export function recupererToken() {
   // On retourne la partie droite = le token
   return cookieToken.split("=")[1];
 }
+
+export function supprimerToken() {
+  document.cookie =
+    "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+}

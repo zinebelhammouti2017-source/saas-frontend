@@ -1,20 +1,29 @@
 import { useState } from "react";
-import { creerTache } from "@/services/taskService";
+import { creerTache, modifierTache } from "@/services/taskService";
 import styles from "./TaskModal.module.css";
 
-export default function TaskModal({ onClose, projectId, projet, onTacheCree }) {
-  const [titre, setTitre] = useState("");
-  const [description, setDescription] = useState("");
-  const [dateEcheance, setDateEcheance] = useState("");
-  const [statut, setStatut] = useState("TODO");
-  const [assignesSelectionnes, setAssignesSelectionnes] = useState([]);
+export default function TaskModal({
+  onClose,
+  projectId,
+  projet,
+  onTacheCree,
+  tacheAModifier,
+}) {
+  const [titre, setTitre] = useState(tacheAModifier?.title || "");
+  const [description, setDescription] = useState(tacheAModifier?.description || "");
+  const [dateEcheance, setDateEcheance] = useState(
+    tacheAModifier?.dueDate
+      ? new Date(tacheAModifier.dueDate).toISOString().split("T")[0]
+      : ""
+  );
+  const [statut, setStatut] = useState(tacheAModifier?.status || "TODO");
+  const [assignesSelectionnes, setAssignesSelectionnes] = useState(
+    tacheAModifier?.assignees?.map((assignation) => assignation.user) || []
+  );
 
   const formulaireValide = titre && description && dateEcheance;
-
-  const utilisateursDisponibles = [
-    projet?.owner,
-    ...(projet?.members?.map((membre) => membre.user) || []),
-  ].filter(Boolean);
+  const utilisateursDisponibles =
+    projet?.members?.map((membre) => membre.user) || [];
 
   function ajouterAssigne(idUtilisateur) {
     const utilisateur = utilisateursDisponibles.find(
@@ -49,7 +58,18 @@ export default function TaskModal({ onClose, projectId, projet, onTacheCree }) {
         assigneeIds: assignesSelectionnes.map((user) => user.id),
       });
 
-      console.log("Tâche créée :", nouvelleTache);
+      if (statut !== "TODO") {
+        await modifierTache({
+          projectId,
+          taskId: nouvelleTache.task.id,
+          title: titre,
+          description,
+          status: statut,
+          priority: "LOW",
+          dueDate: new Date(dateEcheance).toISOString(),
+          assigneeIds: assignesSelectionnes.map((user) => user.id),
+        });
+      }
 
       await onTacheCree();
       onClose();
@@ -65,7 +85,7 @@ export default function TaskModal({ onClose, projectId, projet, onTacheCree }) {
           ×
         </button>
 
-        <h2>Créer une tâche</h2>
+        <h2>{tacheAModifier ? "Modifier la tâche" : "Créer une tâche"}</h2>
 
         <form className={styles.form}>
           <div className={styles.field}>
@@ -178,7 +198,9 @@ export default function TaskModal({ onClose, projectId, projet, onTacheCree }) {
             disabled={!formulaireValide}
             onClick={gererCreationTache}
           >
-            + Ajouter une tâche
+            {tacheAModifier
+              ? "Enregistrer les modifications"
+              : "+ Ajouter une tâche"}
           </button>
         </form>
       </div>

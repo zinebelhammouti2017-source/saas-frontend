@@ -1,0 +1,118 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(20, 20, 20, 0.35);
+}
+
+.modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 520px;
+  height: 650px;
+
+  background: #ffffff;
+  border-radius: 12px;
+
+  padding: 56px 42px;
+
+  box-sizing: border-box;
+}
+
+.closeButton {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+
+  border: none;
+  background: transparent;
+
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.inputBar {
+  position: absolute;
+  left: 42px;
+  right: 42px;
+  bottom: 44px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px 14px;
+
+  background: #f8f8f8;
+  border-radius: 999px;
+}
+
+.inputBar input {
+  flex: 1;
+
+  border: none;
+  background: transparent;
+  outline: none;
+
+  font-size: 13px;
+}
+
+.inputBar button {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #d85a00;
+  color: #ffffff;
+
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.generatedTasks {
+  margin-top: 42px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.taskCard {
+  padding: 18px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.taskCard h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.taskCard p {
+  margin: 0;
+  font-size: 13px;
+  color: #666666;
+  line-height: 1.5;
+}
