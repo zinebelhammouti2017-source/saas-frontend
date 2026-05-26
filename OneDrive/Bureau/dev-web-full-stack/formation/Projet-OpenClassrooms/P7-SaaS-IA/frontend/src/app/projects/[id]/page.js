@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import TaskModal from "@/components/TaskModal";
 import ConfirmModal from "@/components/ConfirmModal";
 import AITaskModal from "@/components/AITaskModal";
+
 import { recupererProjetParId } from "@/services/projectService";
 import { recupererTachesProjet, supprimerTache } from "@/services/taskService";
 import { creerCommentaire } from "@/services/commentService";
-import styles from "./projectDetail.module.css";
 
+import styles from "./projectDetail.module.css";
 
 export default function ProjectDetailPage() {
   const { id } = useParams();
@@ -20,11 +22,14 @@ export default function ProjectDetailPage() {
   const [taches, setTaches] = useState([]);
   const [projet, setProjet] = useState(null);
   const [chargement, setChargement] = useState(true);
+
   const [modalTacheOuverte, setModalTacheOuverte] = useState(false);
   const [modalIAOuverte, setModalIAOuverte] = useState(false);
+
   const [commentairesOuverts, setCommentairesOuverts] = useState({});
   const [nouveauxCommentaires, setNouveauxCommentaires] = useState({});
   const [menuOuvert, setMenuOuvert] = useState(null);
+
   const [tacheAModifier, setTacheAModifier] = useState(null);
   const [tacheASupprimer, setTacheASupprimer] = useState(null);
 
@@ -70,6 +75,11 @@ export default function ProjectDetailPage() {
     };
   }, []);
 
+  async function rechargerTaches() {
+    const tachesApi = await recupererTachesProjet(id);
+    setTaches(tachesApi);
+  }
+
   function traduireStatut(statut) {
     switch (statut) {
       case "TODO":
@@ -107,11 +117,6 @@ export default function ProjectDetailPage() {
 
   function toggleMenuTache(taskId) {
     setMenuOuvert(menuOuvert === taskId ? null : taskId);
-  }
-
-  async function rechargerTaches() {
-    const tachesApi = await recupererTachesProjet(id);
-    setTaches(tachesApi);
   }
 
   async function gererAjoutCommentaire(taskId) {
@@ -173,6 +178,32 @@ export default function ProjectDetailPage() {
   const peutGererTaches =
     projet?.userRole === "ADMIN" || projet?.userRole === "CONTRIBUTOR";
 
+   function obtenirInitiales(nom) {
+  if (!nom) return "?";
+
+  const mots = nom.trim().split(" ");
+
+  if (mots.length === 1) {
+    return mots[0].slice(0, 2).toUpperCase();
+  }
+
+  return mots
+    .map((mot) => mot[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+const tachesTriees = [...taches].sort((a, b) => {
+  const ordreStatuts = {
+    TODO: 1,
+    IN_PROGRESS: 2,
+    DONE: 3,
+  };
+
+  return ordreStatuts[a.status] - ordreStatuts[b.status];
+});
+
   return (
     <div className={styles.page}>
       <Header />
@@ -198,30 +229,33 @@ export default function ProjectDetailPage() {
               </button>
             )}
 
-            <button className={styles.aiButton}onClick={() => setModalIAOuverte(true)}>
-              IA
-            </button>
+            {peutGererTaches && (
+              <button
+                className={styles.aiButton}
+                onClick={() => setModalIAOuverte(true)}
+              >
+                IA
+              </button>
+            )}
           </div>
         </div>
-
-        
 
         <div className={styles.contributors}>
           <p>Contributeurs</p>
 
           <div className={styles.users}>
             <div className={styles.userCard}>
-              <span className={styles.avatar}>
-                {projet?.owner?.name?.charAt(0).toUpperCase()}
-              </span>
+             <span className={styles.avatar}>
+                {obtenirInitiales(projet?.owner?.name)}
+             </span>
 
               <span className={styles.role}>Propriétaire</span>
             </div>
 
             {projet?.members?.map((membre) => (
               <div key={membre.id} className={styles.userCard}>
-                <span className={styles.avatar}>
-                  {membre.user.name.charAt(0).toUpperCase()}
+               <span className={styles.avatar}>
+                 {obtenirInitiales(membre.user?.name)}
                 </span>
 
                 <span className={styles.memberName}>{membre.user.name}</span>
@@ -252,7 +286,7 @@ export default function ProjectDetailPage() {
           {taches.length === 0 ? (
             <p>Aucune tâche pour ce projet pour le moment.</p>
           ) : (
-            taches.map((tache) => (
+            tachesTriees.map((tache) => (
               <div key={tache.id} className={styles.taskCard}>
                 <div className={styles.taskTop}>
                   <div>
@@ -324,6 +358,7 @@ export default function ProjectDetailPage() {
                           .split(" ")
                           .map((mot) => mot[0])
                           .join("")
+                          .slice(0, 2)
                           .toUpperCase()}
                       </span>
 
@@ -408,8 +443,10 @@ export default function ProjectDetailPage() {
 
       {modalIAOuverte && (
         <AITaskModal
-        onClose={() => setModalIAOuverte(false)}
-       />
+          projectId={id}
+          onClose={() => setModalIAOuverte(false)}
+          onTachesCreees={rechargerTaches}
+        />
       )}
 
       {tacheASupprimer && (

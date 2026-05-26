@@ -112,3 +112,28 @@
   cursor: pointer;
   font-size: 14px;
 }
+
+.dropdown a,
+.dropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 12px;
+  border-radius: 8px;
+
+  color: #1f1f1f;
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown a:hover,
+.dropdown button:hover {
+  background-color: #f8f5f2;
+  color: #d85a00;
+}

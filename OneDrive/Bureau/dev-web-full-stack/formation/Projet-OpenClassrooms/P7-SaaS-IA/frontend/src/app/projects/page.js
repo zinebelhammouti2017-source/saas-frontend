@@ -72,6 +72,7 @@ export default function ProjectsPage() {
       .split(" ")
       .map((mot) => mot[0])
       .join("")
+      .slice(0, 2)
       .toUpperCase();
   }
 
@@ -164,7 +165,7 @@ export default function ProjectsPage() {
 
                   <div className={styles.progressSection}>
                     <div className={styles.progressHeader}>
-                      <span>Progression</span>
+                       <span>Progression</span>
                       <span>0%</span>
                     </div>
 

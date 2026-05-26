@@ -23,7 +23,7 @@ export async function creerTache({
       assigneeIds,
       title,
       description,
-      status,
+      
       priority,
       dueDate,
     }),

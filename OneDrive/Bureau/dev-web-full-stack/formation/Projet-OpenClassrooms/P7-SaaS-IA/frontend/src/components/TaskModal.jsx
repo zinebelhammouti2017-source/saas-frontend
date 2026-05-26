@@ -47,37 +47,40 @@ export default function TaskModal({
     );
   }
 
-  async function gererCreationTache() {
-    try {
-      const nouvelleTache = await creerTache({
-        projectId,
-        title: titre,
-        description,
-        priority: "LOW",
-        dueDate: new Date(dateEcheance).toISOString(),
-        assigneeIds: assignesSelectionnes.map((user) => user.id),
-      });
+  async function gererEnregistrementTache() {
+  try {
+    const donneesTache = {
+      projectId,
+      title: titre,
+      description,
+      status: statut,
+      priority: "LOW",
+      dueDate: new Date(dateEcheance).toISOString(),
+      assigneeIds: assignesSelectionnes.map((user) => user.id),
+    };
 
-      if (statut !== "TODO") {
-        await modifierTache({
-          projectId,
-          taskId: nouvelleTache.task.id,
-          title: titre,
-          description,
-          status: statut,
-          priority: "LOW",
-          dueDate: new Date(dateEcheance).toISOString(),
-          assigneeIds: assignesSelectionnes.map((user) => user.id),
-        });
-      }
+    if (tacheAModifier) {
+  await modifierTache({
+    ...donneesTache,
+    taskId: tacheAModifier.id,
+  });
+} else {
+  const nouvelleTache = await creerTache(donneesTache);
 
-      await onTacheCree();
-      onClose();
-    } catch (erreur) {
-      console.error("Erreur création tâche :", erreur);
-    }
+  if (statut !== "TODO") {
+    await modifierTache({
+      ...donneesTache,
+      taskId: nouvelleTache.task.id,
+    });
   }
+}
 
+    await onTacheCree();
+    onClose();
+  } catch (erreur) {
+    console.error("Erreur enregistrement tâche :", erreur);
+  }
+}
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -196,7 +199,7 @@ export default function TaskModal({
             }`}
             type="button"
             disabled={!formulaireValide}
-            onClick={gererCreationTache}
+            onClick={gererEnregistrementTache}
           >
             {tacheAModifier
               ? "Enregistrer les modifications"
