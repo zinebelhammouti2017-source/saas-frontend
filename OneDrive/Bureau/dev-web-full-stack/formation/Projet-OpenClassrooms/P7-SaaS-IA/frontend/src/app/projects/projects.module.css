@@ -184,3 +184,9 @@
 .projectMenu button:hover {
   background-color: #f8f5f2;
 }
+
+.ownerAvatar {
+  background-color: #ffe3d3;
+  color: #d85a00;
+  font-weight: 700;
+}

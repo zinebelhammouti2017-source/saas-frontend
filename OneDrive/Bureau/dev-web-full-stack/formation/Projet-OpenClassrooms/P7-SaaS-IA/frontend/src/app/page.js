@@ -8,6 +8,11 @@ export default function HomePage() {
   const router = useRouter();
 
   useEffect(() => {
+
+    // Point d'entrée de l'application :
+    // on vérifie uniquement la présence du token afin d'orienter
+    // l'utilisateur vers la bonne page selon son état de connexion.
+
     const token = recupererToken();
 
     if (token) {

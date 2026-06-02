@@ -113,3 +113,17 @@
 .button:hover {
   background-color: #000000;
 }
+
+.passwordHint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.errorMessage {
+  margin-top: 8px;
+  color: #d93025;
+  font-size: 13px;
+  line-height: 1.4;
+}

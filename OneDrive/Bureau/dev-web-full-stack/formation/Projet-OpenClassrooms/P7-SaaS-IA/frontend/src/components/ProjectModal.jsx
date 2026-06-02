@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { creerProjet, modifierProjet } from "@/services/projectService";
 import { rechercherUtilisateurs } from "@/services/userService";
+import {
+  creerProjet,
+  modifierProjet,
+  ajouterContributeurProjet,
+  retirerContributeurProjet,
+} from "@/services/projectService";
 import styles from "./ProjectModal.module.css";
 
 export default function ProjectModal({ onClose, onProjetCree, projetAModifier }) {
@@ -68,8 +73,47 @@ export default function ProjectModal({ onClose, onProjetCree, projetAModifier })
       if (projetAModifier) {
         await modifierProjet({
           projectId: projetAModifier.id,
-          ...donneesProjet,
+          name: titre,
+          description,
         });
+
+        // Comparaison entre les contributeurs actuellement enregistrés
+        // sur le projet et ceux sélectionnés dans le formulaire.
+        // Cette étape permet de déterminer précisément :
+        // - les contributeurs à ajouter ;
+        // - les contributeurs à retirer ;
+        // afin d'utiliser les routes dédiées du backend
+        // (POST /contributors et DELETE /contributors/:userId).
+        const anciensContributeurs =
+          projetAModifier.members?.map((membre) => membre.user) || [];
+
+        const contributeursAAjouter = contributeurs.filter(
+          (contributeur) =>
+            !anciensContributeurs.some(
+              (ancien) => ancien.email === contributeur.email
+            )
+        );
+
+        const contributeursARetirer = anciensContributeurs.filter(
+          (ancien) =>
+            !contributeurs.some(
+              (contributeur) => contributeur.email === ancien.email
+            )
+        );
+
+        for (const contributeur of contributeursAAjouter) {
+          await ajouterContributeurProjet({
+            projectId: projetAModifier.id,
+            email: contributeur.email,
+          });
+        }
+
+        for (const contributeur of contributeursARetirer) {
+          await retirerContributeurProjet({
+            projectId: projetAModifier.id,
+            userId: contributeur.id,
+          });
+        }
       } else {
         await creerProjet(donneesProjet);
       }
@@ -77,7 +121,7 @@ export default function ProjectModal({ onClose, onProjetCree, projetAModifier })
       await onProjetCree();
       onClose();
     } catch (erreur) {
-      setErreur(erreur.message);
+      setErreur(erreur.message || "Erreur lors de l'enregistrement du projet.");
     } finally {
       setChargement(false);
     }

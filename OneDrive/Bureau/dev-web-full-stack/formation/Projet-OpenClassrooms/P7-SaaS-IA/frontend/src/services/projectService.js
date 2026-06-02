@@ -70,7 +70,6 @@ export async function modifierProjet({
   projectId,
   name,
   description,
-  contributors,
 }) {
   const token = recupererToken();
 
@@ -83,7 +82,6 @@ export async function modifierProjet({
     body: JSON.stringify({
       name,
       description,
-      contributors,
     }),
   });
 
@@ -96,3 +94,51 @@ export async function modifierProjet({
   return donneesApi.data;
 }
 
+export async function ajouterContributeurProjet({ projectId, email }) {
+  const token = recupererToken();
+
+  const reponse = await fetch(
+    `http://localhost:8000/projects/${projectId}/contributors`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        email,
+        role: "CONTRIBUTOR",
+      }),
+    }
+  );
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur ajout contributeur");
+  }
+
+  return donneesApi.data;
+}
+
+export async function retirerContributeurProjet({ projectId, userId }) {
+  const token = recupererToken();
+
+  const reponse = await fetch(
+    `http://localhost:8000/projects/${projectId}/contributors/${userId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur suppression contributeur");
+  }
+
+  return donneesApi.data;
+}

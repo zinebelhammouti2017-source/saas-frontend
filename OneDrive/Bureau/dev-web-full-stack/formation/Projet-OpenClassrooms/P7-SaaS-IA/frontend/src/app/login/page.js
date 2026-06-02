@@ -35,7 +35,7 @@ export default function LoginPage() {
 
       setMessageSucces("Connexion réussie.");
 
-      router.push("/profile");
+      router.push("/dashboard");
     } catch (erreur) {
       setMessageErreur(erreur.message);
     }

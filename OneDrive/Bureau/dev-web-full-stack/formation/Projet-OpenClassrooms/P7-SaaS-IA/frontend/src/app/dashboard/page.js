@@ -9,7 +9,6 @@ import ProjectModal from "@/components/ProjectModal";
 
 import { recupererProfil } from "@/services/authService";
 import { recupererTachesAssignees } from "@/services/dashboardService";
-import { recupererProjets } from "@/services/projectService";
 
 import styles from "./dashboard.module.css";
 
@@ -25,20 +24,26 @@ export default function DashboardPage() {
   useEffect(() => {
     async function chargerDashboard() {
       try {
+        // Le dashboard est une page protégée :
+        // on tente d'abord de récupérer le profil connecté.
+        // Si le token est absent, expiré ou invalide, l'API refuse l'accès.
         const profil = await recupererProfil();
         const tachesApi = await recupererTachesAssignees();
 
         setUtilisateur(profil);
         setTaches(tachesApi);
-      } catch (erreur) {
-        console.error("Erreur dashboard :", erreur);
-      } finally {
+
+        // On affiche le dashboard uniquement après validation de l'accès.
         setChargement(false);
+      } catch {
+        // Accès non autorisé : on redirige vers la connexion
+        // sans afficher brièvement le contenu protégé.
+        router.replace("/login");
       }
     }
 
     chargerDashboard();
-  }, []);
+  }, [router]);
 
   function traduireStatut(statut) {
     switch (statut) {
@@ -67,9 +72,9 @@ export default function DashboardPage() {
   }
 
   async function actualiserDashboard() {
-  const tachesApi = await recupererTachesAssignees();
-  setTaches(tachesApi);
-}
+    const tachesApi = await recupererTachesAssignees();
+    setTaches(tachesApi);
+  }
 
   function afficherCarteTache(tache) {
     return (
@@ -86,7 +91,6 @@ export default function DashboardPage() {
 
         <div className={styles.meta}>
           <span>{tache.project?.name || "Projet"}</span>
-
           <span>
             {tache.dueDate
               ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
@@ -95,7 +99,6 @@ export default function DashboardPage() {
                 })
               : "Sans échéance"}
           </span>
-
           <span>
             {tache.comments?.length || 0} commentaire
             {tache.comments?.length > 1 ? "s" : ""}
@@ -108,10 +111,7 @@ export default function DashboardPage() {
           onClick={() => {
             const idProjet = tache.projectId || tache.project?.id;
 
-            if (!idProjet) {
-              console.error("Aucun projectId trouvé pour cette tâche");
-              return;
-            }
+            if (!idProjet) return;
 
             router.push(`/projects/${idProjet}`);
           }}
@@ -123,9 +123,7 @@ export default function DashboardPage() {
   }
 
   const tachesTodo = taches.filter((tache) => tache.status === "TODO");
-  const tachesEnCours = taches.filter(
-    (tache) => tache.status === "IN_PROGRESS"
-  );
+  const tachesEnCours = taches.filter((tache) => tache.status === "IN_PROGRESS");
   const tachesTerminees = taches.filter((tache) => tache.status === "DONE");
 
   if (chargement) {
@@ -140,7 +138,6 @@ export default function DashboardPage() {
         <div className={styles.top}>
           <div>
             <h1>Tableau de bord</h1>
-
             <p>
               Bonjour {utilisateur?.user?.name || "Utilisateur"}, voici un
               aperçu de vos projets et tâches.
@@ -178,8 +175,6 @@ export default function DashboardPage() {
           </button>
         </div>
 
-
-
         {vueActive === "kanban" && (
           <div className={styles.columns}>
             <div className={styles.column}>
@@ -198,27 +193,26 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-       
-       {vueActive === "liste" && (
-  <div className={styles.listView}>
-    {taches.length === 0 ? (
-      <p>Aucune tâche assignée pour le moment.</p>
-    ) : (
-      [...tachesTodo, ...tachesEnCours, ...tachesTerminees].map(
-        afficherCarteTache
-      )
-    )}
-  </div>
-)}
 
+        {vueActive === "liste" && (
+          <div className={styles.listView}>
+            {taches.length === 0 ? (
+              <p>Aucune tâche assignée pour le moment.</p>
+            ) : (
+              [...tachesTodo, ...tachesEnCours, ...tachesTerminees].map(
+                afficherCarteTache
+              )
+            )}
+          </div>
+        )}
       </main>
-      
+
       {modalProjetOuverte && (
-  <ProjectModal
-    onClose={() => setModalProjetOuverte(false)}
-    onProjetCree={actualiserDashboard}
-  />
-)}
+        <ProjectModal
+          onClose={() => setModalProjetOuverte(false)}
+          onProjetCree={actualiserDashboard}
+        />
+      )}
 
       <Footer />
     </div>

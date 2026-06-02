@@ -23,6 +23,10 @@ export default function ProjectDetailPage() {
   const [projet, setProjet] = useState(null);
   const [chargement, setChargement] = useState(true);
 
+  const [rechercheTache, setRechercheTache] = useState("");
+  const [statutFiltre, setStatutFiltre] = useState("TOUS");
+  const [vueActive, setVueActive] = useState("liste");
+
   const [modalTacheOuverte, setModalTacheOuverte] = useState(false);
   const [modalIAOuverte, setModalIAOuverte] = useState(false);
 
@@ -38,8 +42,6 @@ export default function ProjectDetailPage() {
       try {
         const projetApi = await recupererProjetParId(id);
 
-        // Sécurité côté interface : si l'utilisateur n'a pas de rôle dans ce projet,
-        // il est redirigé vers la liste des projets.
         if (!projetApi.userRole) {
           router.push("/projects");
           return;
@@ -50,8 +52,6 @@ export default function ProjectDetailPage() {
         setProjet(projetApi);
         setTaches(tachesApi);
       } catch {
-        // Si l'API refuse l'accès ou si le projet n'existe pas,
-        // on évite d'afficher une page vide ou une erreur technique.
         router.push("/projects");
       } finally {
         setChargement(false);
@@ -106,6 +106,22 @@ export default function ProjectDetailPage() {
       default:
         return styles.badge;
     }
+  }
+
+  function obtenirInitiales(nom) {
+    if (!nom) return "?";
+
+    const mots = nom.trim().split(" ");
+
+    if (mots.length === 1) {
+      return mots[0].slice(0, 2).toUpperCase();
+    }
+
+    return mots
+      .map((mot) => mot[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
   }
 
   function toggleCommentaires(taskId) {
@@ -173,36 +189,207 @@ export default function ProjectDetailPage() {
     return <p>Chargement du projet...</p>;
   }
 
-  // Permissions selon le rôle renvoyé par l'API.
-  // ADMIN = propriétaire du projet, CONTRIBUTOR = membre contributeur.
   const peutGererTaches =
     projet?.userRole === "ADMIN" || projet?.userRole === "CONTRIBUTOR";
 
-   function obtenirInitiales(nom) {
-  if (!nom) return "?";
+  const tachesFiltrees = taches
+    .filter((tache) => {
+      const correspondRecherche =
+        tache.title.toLowerCase().includes(rechercheTache.toLowerCase()) ||
+        tache.description
+          ?.toLowerCase()
+          .includes(rechercheTache.toLowerCase());
 
-  const mots = nom.trim().split(" ");
+      const correspondStatut =
+        statutFiltre === "TOUS" || tache.status === statutFiltre;
 
-  if (mots.length === 1) {
-    return mots[0].slice(0, 2).toUpperCase();
+      return correspondRecherche && correspondStatut;
+    })
+  .sort((a, b) => {
+  const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+  const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+
+  if (dateA !== dateB) {
+    return dateA - dateB;
   }
 
-  return mots
-    .map((mot) => mot[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-const tachesTriees = [...taches].sort((a, b) => {
   const ordreStatuts = {
     TODO: 1,
     IN_PROGRESS: 2,
     DONE: 3,
+    CANCELLED: 4,
   };
 
   return ordreStatuts[a.status] - ordreStatuts[b.status];
 });
+
+  // Vue calendrier simplifiée :
+  // les tâches filtrées sont regroupées par date d'échéance.
+  // Cela permet d'avoir une vision planning sans ajouter de librairie externe.
+  const tachesParDate = tachesFiltrees.reduce((acc, tache) => {
+    const date = tache.dueDate
+      ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })
+      : "Sans échéance";
+
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+
+    acc[date].push(tache);
+
+    return acc;
+  }, {});
+
+  function afficherTacheListe(tache) {
+    return (
+      <div key={tache.id} className={styles.taskCard}>
+        <div className={styles.taskTop}>
+          <div>
+            <h3>{tache.title}</h3>
+
+            <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
+              {traduireStatut(tache.status)}
+            </span>
+          </div>
+
+          {peutGererTaches && (
+            <div className={styles.taskMenuWrapper}>
+              <button
+                type="button"
+                className={styles.moreButton}
+                onClick={() => toggleMenuTache(tache.id)}
+              >
+                ...
+              </button>
+
+              {menuOuvert === tache.id && (
+                <div className={styles.taskMenu}>
+                  <button
+                    type="button"
+                    onClick={() => ouvrirModificationTache(tache)}
+                  >
+                    Modifier
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.deleteAction}
+                    onClick={() => {
+                      setTacheASupprimer(tache);
+                      setMenuOuvert(null);
+                    }}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <p>{tache.description}</p>
+
+        <p>
+          Échéance :{" "}
+          {tache.dueDate
+            ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "long",
+              })
+            : "Non définie"}
+        </p>
+
+        <div className={styles.assignees}>
+          <p>Assigné à :</p>
+
+          {tache.assignees?.map((assignation) => (
+            <div key={assignation.id} className={styles.assigneeItem}>
+              <span
+                className={`${styles.assigneeAvatar} ${
+                  assignation.user.id === projet?.ownerId ||
+                  assignation.user.id === projet?.owner?.id
+                    ? styles.ownerAvatar
+                    : ""
+                }`}
+              >
+                {obtenirInitiales(assignation.user.name)}
+              </span>
+
+              <span className={styles.assigneeName}>
+                {assignation.user.name}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          className={styles.commentsRow}
+          onClick={() => toggleCommentaires(tache.id)}
+        >
+          <p>Commentaires ({tache.comments?.length || 0})</p>
+          <span>{commentairesOuverts[tache.id] ? "⌃" : "⌄"}</span>
+        </button>
+
+        {commentairesOuverts[tache.id] && (
+          <div className={styles.commentsContent}>
+            {tache.comments?.length > 0 ? (
+              tache.comments.map((commentaire) => (
+                <div key={commentaire.id} className={styles.commentItem}>
+                  <p className={styles.commentAuthor}>
+                    {commentaire.author.name}
+                  </p>
+
+                  <p className={styles.commentText}>{commentaire.content}</p>
+                </div>
+              ))
+            ) : (
+              <p className={styles.noComment}>
+                Aucun commentaire pour le moment.
+              </p>
+            )}
+
+            <div className={styles.commentForm}>
+              <input
+                type="text"
+                placeholder="Ajouter un commentaire..."
+                value={nouveauxCommentaires[tache.id] || ""}
+                onChange={(e) =>
+                  setNouveauxCommentaires({
+                    ...nouveauxCommentaires,
+                    [tache.id]: e.target.value,
+                  })
+                }
+              />
+
+              <button
+                type="button"
+                onClick={() => gererAjoutCommentaire(tache.id)}
+              >
+                Envoyer
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function afficherTacheCalendrier(tache) {
+    return (
+      <div key={tache.id} className={styles.calendarTask}>
+        <strong>{tache.title}</strong>
+
+        <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
+          {traduireStatut(tache.status)}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -245,17 +432,17 @@ const tachesTriees = [...taches].sort((a, b) => {
 
           <div className={styles.users}>
             <div className={styles.userCard}>
-             <span className={styles.avatar}>
+              <span className={`${styles.avatar} ${styles.ownerAvatar}`}>
                 {obtenirInitiales(projet?.owner?.name)}
-             </span>
+              </span>
 
               <span className={styles.role}>Propriétaire</span>
             </div>
 
             {projet?.members?.map((membre) => (
               <div key={membre.id} className={styles.userCard}>
-               <span className={styles.avatar}>
-                 {obtenirInitiales(membre.user?.name)}
+                <span className={styles.avatar}>
+                  {obtenirInitiales(membre.user?.name)}
                 </span>
 
                 <span className={styles.memberName}>{membre.user.name}</span>
@@ -268,161 +455,57 @@ const tachesTriees = [...taches].sort((a, b) => {
           <div className={styles.tasksHeader}>
             <div>
               <h2>Tâches</h2>
-              <p>Par ordre de priorité</p>
+              <p>
+                {vueActive === "liste"
+                  ? "Par ordre de priorité"
+                  : "Par date d’échéance"}
+              </p>
             </div>
 
             <div className={styles.filters}>
-              <button>Liste</button>
-              <button>Calendrier</button>
+              <button
+                type="button"
+                onClick={() => setVueActive("liste")}
+              >
+                Liste
+              </button>
 
-              <select>
-                <option>Statut</option>
+              <button
+                type="button"
+                onClick={() => setVueActive("calendrier")}
+              >
+                Calendrier
+              </button>
+
+              <select
+                value={statutFiltre}
+                onChange={(e) => setStatutFiltre(e.target.value)}
+              >
+                <option value="TOUS">Tous les statuts</option>
+                <option value="TODO">À faire</option>
+                <option value="IN_PROGRESS">En cours</option>
+                <option value="DONE">Terminée</option>
               </select>
 
-              <input placeholder="Rechercher une tâche" />
+              <input
+                type="search"
+                placeholder="Rechercher une tâche"
+                value={rechercheTache}
+                onChange={(e) => setRechercheTache(e.target.value)}
+              />
             </div>
           </div>
 
-          {taches.length === 0 ? (
-            <p>Aucune tâche pour ce projet pour le moment.</p>
+          {tachesFiltrees.length === 0 ? (
+            <p>Aucune tâche ne correspond à votre recherche.</p>
+          ) : vueActive === "liste" ? (
+            tachesFiltrees.map(afficherTacheListe)
           ) : (
-            tachesTriees.map((tache) => (
-              <div key={tache.id} className={styles.taskCard}>
-                <div className={styles.taskTop}>
-                  <div>
-                    <h3>{tache.title}</h3>
+            Object.entries(tachesParDate).map(([date, tachesDate]) => (
+              <div key={date} className={styles.calendarSection}>
+                <h3 className={styles.calendarDate}>📅 {date}</h3>
 
-                    <span
-                      className={`${styles.badge} ${getClasseStatut(
-                        tache.status
-                      )}`}
-                    >
-                      {traduireStatut(tache.status)}
-                    </span>
-                  </div>
-
-                  {peutGererTaches && (
-                    <div className={styles.taskMenuWrapper}>
-                      <button
-                        type="button"
-                        className={styles.moreButton}
-                        onClick={() => toggleMenuTache(tache.id)}
-                      >
-                        ...
-                      </button>
-
-                      {menuOuvert === tache.id && (
-                        <div className={styles.taskMenu}>
-                          <button
-                            type="button"
-                            onClick={() => ouvrirModificationTache(tache)}
-                          >
-                            Modifier
-                          </button>
-
-                          <button
-                            type="button"
-                            className={styles.deleteAction}
-                            onClick={() => {
-                              setTacheASupprimer(tache);
-                              setMenuOuvert(null);
-                            }}
-                          >
-                            Supprimer
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <p>{tache.description}</p>
-
-                <p>
-                  Échéance :{" "}
-                  {tache.dueDate
-                    ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
-                        day: "numeric",
-                        month: "long",
-                      })
-                    : "Non définie"}
-                </p>
-
-                <div className={styles.assignees}>
-                  <p>Assigné à :</p>
-
-                  {tache.assignees?.map((assignation) => (
-                    <div key={assignation.id} className={styles.assigneeItem}>
-                      <span className={styles.assigneeAvatar}>
-                        {assignation.user.name
-                          .split(" ")
-                          .map((mot) => mot[0])
-                          .join("")
-                          .slice(0, 2)
-                          .toUpperCase()}
-                      </span>
-
-                      <span className={styles.assigneeName}>
-                        {assignation.user.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.commentsRow}
-                  onClick={() => toggleCommentaires(tache.id)}
-                >
-                  <p>Commentaires ({tache.comments?.length || 0})</p>
-                  <span>{commentairesOuverts[tache.id] ? "⌃" : "⌄"}</span>
-                </button>
-
-                {commentairesOuverts[tache.id] && (
-                  <div className={styles.commentsContent}>
-                    {tache.comments?.length > 0 ? (
-                      tache.comments.map((commentaire) => (
-                        <div
-                          key={commentaire.id}
-                          className={styles.commentItem}
-                        >
-                          <p className={styles.commentAuthor}>
-                            {commentaire.author.name}
-                          </p>
-
-                          <p className={styles.commentText}>
-                            {commentaire.content}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className={styles.noComment}>
-                        Aucun commentaire pour le moment.
-                      </p>
-                    )}
-
-                    <div className={styles.commentForm}>
-                      <input
-                        type="text"
-                        placeholder="Ajouter un commentaire..."
-                        value={nouveauxCommentaires[tache.id] || ""}
-                        onChange={(e) =>
-                          setNouveauxCommentaires({
-                            ...nouveauxCommentaires,
-                            [tache.id]: e.target.value,
-                          })
-                        }
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => gererAjoutCommentaire(tache.id)}
-                      >
-                        Envoyer
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {tachesDate.map(afficherTacheCalendrier)}
               </div>
             ))
           )}

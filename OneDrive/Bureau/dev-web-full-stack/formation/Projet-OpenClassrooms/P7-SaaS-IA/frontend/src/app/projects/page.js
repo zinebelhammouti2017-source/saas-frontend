@@ -182,8 +182,8 @@ export default function ProjectsPage() {
                     </p>
 
                     <div className={styles.teamMembers}>
-                      <span className={styles.avatar}>
-                        {obtenirInitiales(projet.owner?.name)}
+                      <span className={`${styles.avatar} ${styles.ownerAvatar}`}>
+                         {obtenirInitiales(projet.owner?.name)}
                       </span>
 
                       <span className={styles.role}>Propriétaire</span>

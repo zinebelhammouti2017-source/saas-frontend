@@ -19,19 +19,21 @@ export default function Header() {
   // Ouverture / fermeture menu avatar
   const [menuOuvert, setMenuOuvert] = useState(false);
 
-  // Chargement automatique du profil connecté
-  useEffect(() => {
-    async function chargerProfil() {
-      try {
-        const profil = await recupererProfil();
-        setUtilisateur(profil.user || profil);
-      } catch (erreur) {
-        console.error("Erreur récupération profil :", erreur);
-      }
+ // Chargement automatique du profil connecté.
+// Si le token est absent, invalide ou expiré, le Header reste simplement
+// sans utilisateur connecté au lieu d'afficher une erreur technique.
+useEffect(() => {
+  async function chargerProfil() {
+    try {
+      const profil = await recupererProfil();
+      setUtilisateur(profil.user || profil);
+    } catch {
+      setUtilisateur(null);
     }
+  }
 
-    chargerProfil();
-  }, []);
+  chargerProfil();
+}, []);
 
   // Déconnexion utilisateur
   function gererDeconnexion() {

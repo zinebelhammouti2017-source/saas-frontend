@@ -392,3 +392,32 @@
   color: #d64545;
 }
 
+.ownerAvatar {
+  background-color: #ffe3d3;
+  color: #d85a00;
+  font-weight: 700;
+}
+
+.calendarSection {
+  margin-bottom: 32px;
+}
+
+.calendarDate {
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.calendarTask {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 12px;
+  margin-bottom: 8px;
+
+  border: 1px solid #ececec;
+  border-radius: 8px;
+
+  background: #ffffff;
+}
