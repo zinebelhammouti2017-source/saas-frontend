@@ -7,8 +7,9 @@ import Footer from "@/components/Footer";
 import ProjectModal from "@/components/ProjectModal";
 import { recupererToken } from "@/utils/cookies";
 import { recupererProfil } from "@/services/authService";
-import { recupererProjets } from "@/services/projectService";
 import { recupererTachesProjet } from "@/services/taskService";
+import { recupererProjets, supprimerProjet } from "@/services/projectService";
+import ConfirmModal from "@/components/ConfirmModal";
 import styles from "./projects.module.css";
 
 export default function ProjectsPage() {
@@ -21,6 +22,7 @@ export default function ProjectsPage() {
   const [projetAModifier, setProjetAModifier] = useState(null);
   const [menuOuvert, setMenuOuvert] = useState(null);
   const [utilisateurConnecte, setUtilisateurConnecte] = useState(null);
+  const [projetASupprimer, setProjetASupprimer] = useState(null);
 
   useEffect(() => {
     async function chargerDonnees() {
@@ -86,9 +88,34 @@ setProjets(projetsAvecProgression);
   }, []);
 
   async function actualiserProjets() {
-    const projetsApi = await recupererProjets();
-    setProjets(projetsApi);
-  }
+  const projetsApi = await recupererProjets();
+
+  const projetsAvecProgression = await Promise.all(
+    projetsApi.map(async (projet) => {
+      const tachesProjet = await recupererTachesProjet(projet.id);
+
+      const totalTaches = tachesProjet.length;
+
+      const tachesTerminees = tachesProjet.filter(
+        (tache) => tache.status === "DONE"
+      ).length;
+
+      const progression =
+        totalTaches === 0
+          ? 0
+          : Math.round((tachesTerminees / totalTaches) * 100);
+
+      return {
+        ...projet,
+        totalTaches,
+        tachesTerminees,
+        progression,
+      };
+    })
+  );
+
+  setProjets(projetsAvecProgression);
+}
 
   function obtenirInitiales(nom) {
     if (!nom) return "?";
@@ -125,6 +152,18 @@ setProjets(projetsAvecProgression);
   if (erreur) {
     return <p>{erreur}</p>;
   }
+
+  async function gererSuppressionProjet() {
+  if (!projetASupprimer) return;
+
+  try {
+    await supprimerProjet(projetASupprimer.id);
+    await actualiserProjets();
+    setProjetASupprimer(null);
+  } catch {
+    setErreur("Impossible de supprimer le projet.");
+  }
+}
 
   return (
     <div className={styles.page}>
@@ -174,13 +213,25 @@ setProjets(projetsAvecProgression);
 
                       {menuOuvert === projet.id && (
                         <div className={styles.projectMenu}>
-                          <button
-                            type="button"
-                            onClick={(e) => ouvrirModificationProjet(e, projet)}
-                          >
-                            Modifier
-                          </button>
-                        </div>
+  <button
+    type="button"
+    onClick={(e) => ouvrirModificationProjet(e, projet)}
+  >
+    Modifier
+  </button>
+
+  <button
+    type="button"
+    className={styles.deleteAction}
+    onClick={(e) => {
+      e.stopPropagation();
+      setProjetASupprimer(projet);
+      setMenuOuvert(null);
+    }}
+  >
+    Supprimer
+  </button>
+</div>
                       )}
                     </div>
                   )}
@@ -243,6 +294,15 @@ setProjets(projetsAvecProgression);
           onProjetCree={actualiserProjets}
         />
       )}
+
+      {projetASupprimer && (
+  <ConfirmModal
+    title="Supprimer le projet"
+    message={`Êtes-vous sûre de vouloir supprimer le projet "${projetASupprimer.name}" ? Cette action est définitive.`}
+    onCancel={() => setProjetASupprimer(null)}
+    onConfirm={gererSuppressionProjet}
+  />
+)}
     </div>
   );
 }

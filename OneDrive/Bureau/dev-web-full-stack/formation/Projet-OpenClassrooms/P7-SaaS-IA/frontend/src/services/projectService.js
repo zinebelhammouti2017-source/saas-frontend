@@ -142,3 +142,22 @@ export async function retirerContributeurProjet({ projectId, userId }) {
 
   return donneesApi.data;
 }
+
+export async function supprimerProjet(projectId) {
+  const token = recupererToken();
+
+  const reponse = await fetch(`http://localhost:8000/projects/${projectId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const donneesApi = await reponse.json();
+
+  if (!reponse.ok) {
+    throw new Error(donneesApi.message || "Erreur suppression projet");
+  }
+
+  return donneesApi;
+}
