@@ -94,6 +94,12 @@
   height: 100%;
   background: #ccc;
   border-radius: 4px;
+  background-color: #e85d04;
+}
+
+
+.progressCompleted {
+  background-color: #22c55e;
 }
 
 .progressText {

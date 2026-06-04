@@ -8,6 +8,7 @@ import ProjectModal from "@/components/ProjectModal";
 import { recupererToken } from "@/utils/cookies";
 import { recupererProfil } from "@/services/authService";
 import { recupererProjets } from "@/services/projectService";
+import { recupererTachesProjet } from "@/services/taskService";
 import styles from "./projects.module.css";
 
 export default function ProjectsPage() {
@@ -34,8 +35,32 @@ export default function ProjectsPage() {
         const profil = await recupererProfil();
         const projetsApi = await recupererProjets();
 
-        setUtilisateurConnecte(profil);
-        setProjets(projetsApi);
+// Pour chaque projet, on récupère ses tâches afin de calculer sa progression réelle.
+const projetsAvecProgression = await Promise.all(
+  projetsApi.map(async (projet) => {
+    const tachesProjet = await recupererTachesProjet(projet.id);
+
+    const totalTaches = tachesProjet.length;
+    const tachesTerminees = tachesProjet.filter(
+      (tache) => tache.status === "DONE"
+    ).length;
+
+    const progression =
+      totalTaches === 0
+        ? 0
+        : Math.round((tachesTerminees / totalTaches) * 100);
+
+    return {
+      ...projet,
+      totalTaches,
+      tachesTerminees,
+      progression,
+    };
+  })
+);
+
+setUtilisateurConnecte(profil);
+setProjets(projetsAvecProgression);
       } catch {
         setErreur("Impossible de charger les projets.");
       } finally {
@@ -166,14 +191,21 @@ export default function ProjectsPage() {
                   <div className={styles.progressSection}>
                     <div className={styles.progressHeader}>
                        <span>Progression</span>
-                      <span>0%</span>
+                      <span>{projet.progression}%</span>
                     </div>
 
                     <div className={styles.progressBar}>
-                      <div className={styles.progressFill}></div>
+                      <div
+                        className={`${styles.progressFill} ${
+                        projet.progression === 100 ? styles.progressCompleted : ""
+                       }`}
+                        style={{ width: `${projet.progression}%` }}
+                     ></div>
                     </div>
 
-                    <p className={styles.progressText}>0/2 tâches terminées</p>
+                    <p className={styles.progressText}>
+                       {projet.tachesTerminees}/{projet.totalTaches} tâches terminées
+                    </p>
                   </div>
 
                   <div className={styles.teamSection}>
