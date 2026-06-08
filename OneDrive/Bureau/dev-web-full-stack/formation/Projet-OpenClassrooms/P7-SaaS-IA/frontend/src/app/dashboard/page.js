@@ -20,24 +20,18 @@ export default function DashboardPage() {
   const [utilisateur, setUtilisateur] = useState(null);
   const [vueActive, setVueActive] = useState("kanban");
   const [modalProjetOuverte, setModalProjetOuverte] = useState(false);
+  const [recherche, setRecherche] = useState("");
 
   useEffect(() => {
     async function chargerDashboard() {
       try {
-        // Le dashboard est une page protégée :
-        // on tente d'abord de récupérer le profil connecté.
-        // Si le token est absent, expiré ou invalide, l'API refuse l'accès.
         const profil = await recupererProfil();
         const tachesApi = await recupererTachesAssignees();
 
         setUtilisateur(profil);
         setTaches(tachesApi);
-
-        // On affiche le dashboard uniquement après validation de l'accès.
         setChargement(false);
       } catch {
-        // Accès non autorisé : on redirige vers la connexion
-        // sans afficher brièvement le contenu protégé.
         router.replace("/login");
       }
     }
@@ -67,8 +61,17 @@ export default function DashboardPage() {
       case "DONE":
         return styles.badgeDone;
       default:
-        return styles.badge;
+        return "";
     }
+  }
+
+  function trierParDate(taches) {
+    return [...taches].sort((a, b) => {
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    });
   }
 
   async function actualiserDashboard() {
@@ -77,8 +80,15 @@ export default function DashboardPage() {
   }
 
   function afficherCarteTache(tache) {
+    const idProjet = tache.projectId || tache.project?.id;
+
     return (
-      <div key={tache.id} className={styles.card}>
+      <article
+        key={tache.id}
+        className={`${styles.card} ${
+          vueActive === "liste" ? styles.cardList : styles.cardKanban
+        }`}
+      >
         <div className={styles.cardHeader}>
           <h3>{tache.title}</h3>
 
@@ -90,17 +100,21 @@ export default function DashboardPage() {
         <p className={styles.description}>{tache.description}</p>
 
         <div className={styles.meta}>
-          <span>{tache.project?.name || "Projet"}</span>
+          <span>📁 {tache.project?.name || "Projet"}</span>
+
           <span>
+            📅{" "}
             {tache.dueDate
               ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
-                  month: "short",
                   day: "numeric",
+                  month: "short",
+                  year: "numeric",
                 })
               : "Sans échéance"}
           </span>
+
           <span>
-            {tache.comments?.length || 0} commentaire
+            💬 {tache.comments?.length || 0} commentaire
             {tache.comments?.length > 1 ? "s" : ""}
           </span>
         </div>
@@ -109,22 +123,43 @@ export default function DashboardPage() {
           type="button"
           className={styles.viewButton}
           onClick={() => {
-            const idProjet = tache.projectId || tache.project?.id;
-
             if (!idProjet) return;
-
             router.push(`/projects/${idProjet}`);
           }}
         >
           Voir
         </button>
-      </div>
+      </article>
     );
   }
 
-  const tachesTodo = taches.filter((tache) => tache.status === "TODO");
-  const tachesEnCours = taches.filter((tache) => tache.status === "IN_PROGRESS");
-  const tachesTerminees = taches.filter((tache) => tache.status === "DONE");
+  const rechercheNormalisee = recherche.toLowerCase().trim();
+
+  const tachesFiltrees = taches.filter((tache) => {
+    const titre = tache.title?.toLowerCase() || "";
+    const description = tache.description?.toLowerCase() || "";
+    const nomProjet = tache.project?.name?.toLowerCase() || "";
+
+    return (
+      titre.includes(rechercheNormalisee) ||
+      description.includes(rechercheNormalisee) ||
+      nomProjet.includes(rechercheNormalisee)
+    );
+  });
+
+  const tachesTodo = trierParDate(
+    tachesFiltrees.filter((tache) => tache.status === "TODO")
+  );
+
+  const tachesEnCours = trierParDate(
+    tachesFiltrees.filter((tache) => tache.status === "IN_PROGRESS")
+  );
+
+  const tachesTerminees = trierParDate(
+    tachesFiltrees.filter((tache) => tache.status === "DONE")
+  );
+
+  const tachesListe = [...tachesTodo, ...tachesEnCours, ...tachesTerminees];
 
   if (chargement) {
     return <p>Chargement du dashboard...</p>;
@@ -175,34 +210,55 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        {vueActive === "kanban" && (
-          <div className={styles.columns}>
-            <div className={styles.column}>
-              <h2>À faire ({tachesTodo.length})</h2>
-              {tachesTodo.map(afficherCarteTache)}
+        {vueActive === "liste" && (
+          <section className={styles.tasksPanel}>
+            <div className={styles.tasksPanelHeader}>
+              <div>
+                <h2>Mes tâches assignées</h2>
+                <p>Par ordre de date</p>
+              </div>
+
+              <input
+                type="search"
+                placeholder="Rechercher une tâche"
+                value={recherche}
+                onChange={(e) => setRecherche(e.target.value)}
+                className={styles.searchInput}
+              />
             </div>
 
-            <div className={styles.column}>
-              <h2>En cours ({tachesEnCours.length})</h2>
-              {tachesEnCours.map(afficherCarteTache)}
+            <div className={styles.listView}>
+              {tachesListe.length === 0 ? (
+                <p className={styles.emptyText}>Aucune tâche trouvée.</p>
+              ) : (
+                tachesListe.map(afficherCarteTache)
+              )}
             </div>
-
-            <div className={styles.column}>
-              <h2>Terminées ({tachesTerminees.length})</h2>
-              {tachesTerminees.map(afficherCarteTache)}
-            </div>
-          </div>
+          </section>
         )}
 
-        {vueActive === "liste" && (
-          <div className={styles.listView}>
-            {taches.length === 0 ? (
-              <p>Aucune tâche assignée pour le moment.</p>
-            ) : (
-              [...tachesTodo, ...tachesEnCours, ...tachesTerminees].map(
-                afficherCarteTache
-              )
-            )}
+        {vueActive === "kanban" && (
+          <div className={styles.columns}>
+            <section className={styles.column}>
+              <h2>
+                À faire <span>{tachesTodo.length}</span>
+              </h2>
+              {tachesTodo.map(afficherCarteTache)}
+            </section>
+
+            <section className={styles.column}>
+              <h2>
+                En cours <span>{tachesEnCours.length}</span>
+              </h2>
+              {tachesEnCours.map(afficherCarteTache)}
+            </section>
+
+            <section className={styles.column}>
+              <h2>
+                Terminées <span>{tachesTerminees.length}</span>
+              </h2>
+              {tachesTerminees.map(afficherCarteTache)}
+            </section>
           </div>
         )}
       </main>

@@ -13,11 +13,26 @@ export default function RegisterPage() {
   const [messageSucces, setMessageSucces] = useState("");
   const router = useRouter();
 
+  function validerMotDePasse(motDePasse) {
+  const contientMajuscule = /[A-Z]/.test(motDePasse);
+  const contientChiffre = /[0-9]/.test(motDePasse);
+  const longueurValide = motDePasse.length >= 8;
+
+  return contientMajuscule && contientChiffre && longueurValide;
+}
+
   async function gererInscription(evenement) {
     evenement.preventDefault();
 
     setMessageErreur("");
     setMessageSucces("");
+
+    if (!validerMotDePasse(motDePasse)) {
+         setMessageErreur(
+          "Le mot de passe ne respecte pas encore les conditions indiquées."
+        );
+        return;
+      }
 
     try {
       const reponse = await inscrireUtilisateur({
@@ -72,6 +87,18 @@ export default function RegisterPage() {
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
             />
+
+           
+             <div className={styles.passwordRules}>
+              <p>Votre mot de passe doit contenir :</p>
+
+               <ul>
+    <li>8 caractères minimum</li>
+    <li>Une majuscule</li>
+    <li>Un chiffre</li>
+  </ul>
+</div>
+           
 
             <button type="submit" > S'inscrire </button>
           </form>

@@ -10,7 +10,9 @@ export default function TaskModal({
   tacheAModifier,
 }) {
   const [titre, setTitre] = useState(tacheAModifier?.title || "");
-  const [description, setDescription] = useState(tacheAModifier?.description || "");
+  const [description, setDescription] = useState(
+    tacheAModifier?.description || ""
+  );
   const [dateEcheance, setDateEcheance] = useState(
     tacheAModifier?.dueDate
       ? new Date(tacheAModifier.dueDate).toISOString().split("T")[0]
@@ -20,6 +22,7 @@ export default function TaskModal({
   const [assignesSelectionnes, setAssignesSelectionnes] = useState(
     tacheAModifier?.assignees?.map((assignation) => assignation.user) || []
   );
+  const [messageErreur, setMessageErreur] = useState("");
 
   const formulaireValide = titre && description && dateEcheance;
   const utilisateursDisponibles =
@@ -48,39 +51,38 @@ export default function TaskModal({
   }
 
   async function gererEnregistrementTache() {
-  try {
-    const donneesTache = {
-      projectId,
-      title: titre,
-      description,
-      status: statut,
-      priority: "LOW",
-      dueDate: new Date(dateEcheance).toISOString(),
-      assigneeIds: assignesSelectionnes.map((user) => user.id),
-    };
+    setMessageErreur("");
 
-    if (tacheAModifier) {
-  await modifierTache({
-    ...donneesTache,
-    taskId: tacheAModifier.id,
-  });
-} else {
-  const nouvelleTache = await creerTache(donneesTache);
+    try {
+      const donneesTache = {
+        projectId,
+        title: titre,
+        description,
+        status: tacheAModifier ? statut : "TODO",
+        priority: "LOW",
+        dueDate: new Date(dateEcheance).toISOString(),
+        assigneeIds: assignesSelectionnes.map((user) => user.id),
+      };
 
-  if (statut !== "TODO") {
-    await modifierTache({
-      ...donneesTache,
-      taskId: nouvelleTache.task.id,
-    });
+      if (tacheAModifier) {
+        await modifierTache({
+          ...donneesTache,
+          taskId: tacheAModifier.id,
+        });
+      } else {
+        await creerTache(donneesTache);
+      }
+
+      await onTacheCree();
+      onClose();
+    } catch (erreur) {
+      setMessageErreur(
+        erreur.message ||
+          "Une erreur est survenue pendant l'enregistrement de la tâche."
+      );
+    }
   }
-}
 
-    await onTacheCree();
-    onClose();
-  } catch (erreur) {
-    console.error("Erreur enregistrement tâche :", erreur);
-  }
-}
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
@@ -155,43 +157,56 @@ export default function TaskModal({
             )}
           </div>
 
-          <div className={styles.statusSection}>
-            <p>Statut :</p>
-
-            <div className={styles.statusList}>
-              <button
-                type="button"
-                className={`${styles.statusButton} ${
-                  statut === "TODO" ? styles.activeTodo : styles.todo
-                }`}
-                onClick={() => setStatut("TODO")}
-              >
+          {!tacheAModifier && (
+            <div className={styles.defaultStatus}>
+              <span className={styles.defaultStatusLabel}>Statut par défaut</span>
+              <span className={`${styles.statusBadge} ${styles.todo}`}>
                 À faire
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.statusButton} ${
-                  statut === "IN_PROGRESS"
-                    ? styles.activeProgress
-                    : styles.progress
-                }`}
-                onClick={() => setStatut("IN_PROGRESS")}
-              >
-                En cours
-              </button>
-
-              <button
-                type="button"
-                className={`${styles.statusButton} ${
-                  statut === "DONE" ? styles.activeDone : styles.done
-                }`}
-                onClick={() => setStatut("DONE")}
-              >
-                Terminée
-              </button>
+              </span>
             </div>
-          </div>
+          )}
+
+          {tacheAModifier && (
+            <div className={styles.statusSection}>
+              <p>Statut :</p>
+
+              <div className={styles.statusList}>
+                <button
+                  type="button"
+                  className={`${styles.statusButton} ${styles.todo} ${
+                    statut === "TODO" ? styles.statusActive : ""
+                  }`}
+                  onClick={() => setStatut("TODO")}
+                >
+                  À faire
+                </button>
+
+                <button
+                  type="button"
+                  className={`${styles.statusButton} ${styles.progress} ${
+                    statut === "IN_PROGRESS" ? styles.statusActive : ""
+                  }`}
+                  onClick={() => setStatut("IN_PROGRESS")}
+                >
+                  En cours
+                </button>
+
+                <button
+                  type="button"
+                  className={`${styles.statusButton} ${styles.done} ${
+                    statut === "DONE" ? styles.statusActive : ""
+                  }`}
+                  onClick={() => setStatut("DONE")}
+                >
+                  Terminée
+                </button>
+              </div>
+            </div>
+          )}
+
+          {messageErreur && (
+            <p className={styles.errorMessage}>{messageErreur}</p>
+          )}
 
           <button
             className={`${styles.submitButton} ${

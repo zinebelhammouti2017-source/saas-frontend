@@ -205,14 +205,8 @@ export default function ProjectDetailPage() {
 
       return correspondRecherche && correspondStatut;
     })
-  .sort((a, b) => {
-  const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-  const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
-
-  if (dateA !== dateB) {
-    return dateA - dateB;
-  }
-
+    
+    .sort((a, b) => {
   const ordreStatuts = {
     TODO: 1,
     IN_PROGRESS: 2,
@@ -220,7 +214,17 @@ export default function ProjectDetailPage() {
     CANCELLED: 4,
   };
 
-  return ordreStatuts[a.status] - ordreStatuts[b.status];
+  const ordreStatutA = ordreStatuts[a.status] || 99;
+  const ordreStatutB = ordreStatuts[b.status] || 99;
+
+  if (ordreStatutA !== ordreStatutB) {
+    return ordreStatutA - ordreStatutB;
+  }
+
+  const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+  const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+
+  return dateA - dateB;
 });
 
   // Vue calendrier simplifiée :
@@ -299,6 +303,7 @@ export default function ProjectDetailPage() {
             ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
                 day: "numeric",
                 month: "long",
+                year: "numeric",
               })
             : "Non définie"}
         </p>
