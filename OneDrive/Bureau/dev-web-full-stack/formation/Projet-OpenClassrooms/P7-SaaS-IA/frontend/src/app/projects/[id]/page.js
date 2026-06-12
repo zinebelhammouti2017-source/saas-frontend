@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import TaskModal from "@/components/TaskModal";
 import ConfirmModal from "@/components/ConfirmModal";
 import AITaskModal from "@/components/AITaskModal";
+import TaskCard from "@/components/TaskCard";
 
 import { recupererProjetParId } from "@/services/projectService";
 import { recupererTachesProjet, supprimerTache } from "@/services/taskService";
@@ -284,156 +285,6 @@ export default function ProjectDetailPage() {
     return acc;
   }, {});
 
-  function afficherTacheListe(tache) {
-    const peutModifierOuSupprimer =
-      utilisateurPeutModifierOuSupprimerTache(tache);
-
-    return (
-      <div
-        key={tache.id}
-        className={`${styles.taskCard} ${
-        utilisateurEstAssigne(tache) ? styles.maTache : ""
-      }`}
->
-        <div className={styles.taskTop}>
-          <div>
-            <h3>{tache.title}</h3>
-
-            <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
-              {traduireStatut(tache.status)}
-            </span>
-          </div>
-
-          {peutModifierOuSupprimer && (
-            <div className={styles.taskMenuWrapper}>
-              <button
-                type="button"
-                className={styles.moreButton}
-                onClick={() => toggleMenuTache(tache.id)}
-              >
-                ...
-              </button>
-
-              {menuOuvert === tache.id && (
-                <div className={styles.taskMenu}>
-                  <button
-                    type="button"
-                    onClick={() => ouvrirModificationTache(tache)}
-                  >
-                    Modifier
-                  </button>
-
-                  <button
-                    type="button"
-                    className={styles.deleteAction}
-                    onClick={() => {
-                      setTacheASupprimer(tache);
-                      setMenuOuvert(null);
-                    }}
-                  >
-                    Supprimer
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        <p>{tache.description}</p>
-
-        <p>
-          Échéance :{" "}
-          {tache.dueDate
-            ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            : "Non définie"}
-        </p>
-
-        <div className={styles.assignees}>
-          <p>Assigné à :</p>
-
-          {tache.assignees?.map((assignation) => (
-            <div key={assignation.id} className={styles.assigneeItem}>
-              <span
-                className={`${styles.assigneeAvatar} ${
-                  assignation.user.id === projet?.ownerId ||
-                  assignation.user.id === projet?.owner?.id
-                    ? styles.ownerAvatar
-                    : ""
-                }`}
-              >
-                {obtenirInitiales(assignation.user.name)}
-              </span>
-
-              <span className={styles.assigneeName}>
-                {assignation.user.name}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        <button
-          type="button"
-          className={styles.commentsRow}
-          onClick={() => toggleCommentaires(tache.id)}
-        >
-          <p>Commentaires ({tache.comments?.length || 0})</p>
-          <span>{commentairesOuverts[tache.id] ? "⌃" : "⌄"}</span>
-        </button>
-
-        {commentairesOuverts[tache.id] && (
-          <div className={styles.commentsContent}>
-            {tache.comments?.length > 0 ? (
-              tache.comments.map((commentaire) => (
-                <div key={commentaire.id} className={styles.commentItem}>
-                  <div className={styles.commentHeader}>
-                    <p className={styles.commentAuthor}>
-                      {commentaire.author.name}
-                    </p>
-
-                    <span className={styles.commentDate}>
-                      {formaterDateCommentaire(commentaire.createdAt)}
-                    </span>
-                  </div>
-
-                  <p className={styles.commentText}>{commentaire.content}</p>
-                </div>
-              ))
-            ) : (
-              <p className={styles.noComment}>
-                Aucun commentaire pour le moment.
-              </p>
-            )}
-
-            <div className={styles.commentForm}>
-              <input
-                type="text"
-                placeholder="Ajouter un commentaire..."
-                value={nouveauxCommentaires[tache.id] || ""}
-                onChange={(e) =>
-                  setNouveauxCommentaires({
-                    ...nouveauxCommentaires,
-                    [tache.id]: e.target.value,
-                  })
-                }
-              />
-
-              <button
-                type="button"
-                onClick={() => gererAjoutCommentaire(tache.id)}
-              >
-                Envoyer
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
  function afficherTacheCalendrier(tache) {
   return (
     <div
@@ -558,7 +409,31 @@ export default function ProjectDetailPage() {
            ) : tachesFiltrees.length === 0 ? (
             <p>Aucune tâche ne correspond à votre recherche.</p>
           ) : vueActive === "liste" ? (
-            tachesFiltrees.map(afficherTacheListe)
+            tachesFiltrees.map((tache) => (
+              <TaskCard
+                key={tache.id}
+                tache={tache}
+                projet={projet}
+                menuOuvert={menuOuvert}
+                commentairesOuverts={commentairesOuverts}
+                nouveauxCommentaires={nouveauxCommentaires}
+                utilisateurEstAssigne={utilisateurEstAssigne}
+                utilisateurPeutModifierOuSupprimerTache={
+                  utilisateurPeutModifierOuSupprimerTache
+                }
+                getClasseStatut={getClasseStatut}
+                traduireStatut={traduireStatut}
+                obtenirInitiales={obtenirInitiales}
+                formaterDateCommentaire={formaterDateCommentaire}
+                toggleMenuTache={toggleMenuTache}
+                toggleCommentaires={toggleCommentaires}
+                ouvrirModificationTache={ouvrirModificationTache}
+                setTacheASupprimer={setTacheASupprimer}
+                setMenuOuvert={setMenuOuvert}
+                setNouveauxCommentaires={setNouveauxCommentaires}
+                gererAjoutCommentaire={gererAjoutCommentaire}
+              />
+            ))
           ) : (
             Object.entries(tachesParDate).map(([date, tachesDate]) => (
               <div key={date} className={styles.calendarSection}>
