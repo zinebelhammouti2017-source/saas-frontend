@@ -3,6 +3,10 @@ import { recupererToken } from "@/utils/cookies";
 export async function getProfile() {
   const token = recupererToken();
 
+  if (!token) {
+    throw new Error("Utilisateur non connecté");
+  }
+
   const reponse = await fetch("http://localhost:8000/auth/profile", {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -10,8 +14,6 @@ export async function getProfile() {
   });
 
   const donneesApi = await reponse.json();
-
-  console.log("Réponse profil API :", donneesApi);
 
   if (!reponse.ok) {
     throw new Error(

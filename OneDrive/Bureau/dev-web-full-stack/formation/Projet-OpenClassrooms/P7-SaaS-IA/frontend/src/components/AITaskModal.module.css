@@ -2,26 +2,22 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
-
   display: flex;
   justify-content: center;
   align-items: center;
-
   background: rgba(20, 20, 20, 0.35);
 }
 
 .modal {
   position: relative;
-
   width: 100%;
   max-width: 520px;
   height: 650px;
-
+  display: flex;
+  flex-direction: column;
   background: #ffffff;
   border-radius: 12px;
-
-  padding: 56px 42px;
-
+  padding: 56px 42px 32px;
   box-sizing: border-box;
 }
 
@@ -29,71 +25,33 @@
   position: absolute;
   top: 24px;
   right: 24px;
-
   border: none;
   background: transparent;
-
   font-size: 24px;
   cursor: pointer;
   color: #6b7280;
 }
 
 .modal h2 {
-  margin: 0;
+  flex-shrink: 0;
+  margin: 0 0 32px;
   font-size: 22px;
   font-weight: 600;
   color: #111111;
 }
 
-.inputBar {
-  position: absolute;
-  left: 42px;
-  right: 42px;
-  bottom: 44px;
-
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  padding: 12px 14px;
-
-  background: #f8f8f8;
-  border-radius: 999px;
-}
-
-.inputBar input {
+.content {
   flex: 1;
-
-  border: none;
-  background: transparent;
-  outline: none;
-
-  font-size: 13px;
-}
-
-.inputBar button {
-  width: 30px;
-  height: 30px;
-
-  border: none;
-  border-radius: 50%;
-
-  background: #d85a00;
-  color: #ffffff;
-
-  font-size: 18px;
-  cursor: pointer;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  padding-bottom: 20px;
 }
 
 .generatedTasks {
-  margin-top: 42px;
-
   display: flex;
   flex-direction: column;
   gap: 16px;
-
-  max-height: 420px;
-  overflow-y: auto;
 }
 
 .taskCard {
@@ -117,81 +75,10 @@
   line-height: 1.5;
 }
 
-.taskHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-.taskHeader button {
-  border: none;
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
-  color: #999999;
-}
-
-.taskHeader button:hover {
-  color: #d64545;
-}
-
-.addTasksButton {
-  margin-top: 20px;
-
-  width: 100%;
-
-  border: none;
-  border-radius: 10px;
-
-  padding: 14px 18px;
-
-  background: #1f1f1f;
-  color: #ffffff;
-
-  font-size: 14px;
-  font-weight: 500;
-
-  cursor: pointer;
-}
-
-.addTasksButton:hover {
-  opacity: 0.9;
-}
-
-.taskInput {
-  width: 100%;
-
-  border: none;
-  background: transparent;
-
-  font-size: 18px;
-  font-weight: 600;
-
-  outline: none;
-}
-
-.taskTextarea {
-  width: 100%;
-
-  margin-top: 10px;
-
-  border: none;
-  background: transparent;
-
-  resize: none;
-
-  font-size: 14px;
-  color: #666666;
-
-  outline: none;
-}
-
 .taskActions {
   display: flex;
   align-items: center;
   gap: 10px;
-
   margin-top: 14px;
 }
 
@@ -211,17 +98,153 @@
   color: #d1d5db;
 }
 
+.addTasksButton {
+  width: 100%;
+  margin-top: 20px;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 18px;
+  background: #1f1f1f;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.addTasksButton:hover {
+  opacity: 0.9;
+}
+
+.inputBar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: #f8f8f8;
+  border-radius: 999px;
+}
+
+.inputBar input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+}
+
+.inputBar button {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: #d85a00;
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.taskInput {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  outline: none;
+}
+
+.taskTextarea {
+  width: 100%;
+  margin-top: 10px;
+  border: none;
+  background: transparent;
+  resize: none;
+  font-size: 14px;
+  color: #666666;
+  outline: none;
+}
+
 .saveEditButton {
   width: fit-content;
   margin-top: 12px;
-
   border: none;
   border-radius: 8px;
   padding: 8px 12px;
-
   background-color: #1f1f1f;
   color: #ffffff;
-
   font-size: 12px;
   cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 20px;
+  }
+
+  .modal {
+    max-width: 100%;
+    height: 85vh;
+    padding: 40px 28px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay {
+    padding: 12px;
+    align-items: center;
+  }
+
+  .modal {
+    width: 100%;
+    height: 88vh;
+    padding: 28px 20px 20px;
+    border-radius: 16px;
+  }
+
+  .closeButton {
+    top: 16px;
+    right: 16px;
+  }
+
+  .modal h2 {
+    font-size: 20px;
+    margin-bottom: 24px;
+    padding-right: 30px;
+  }
+
+  .taskCard {
+    padding: 14px;
+  }
+
+  .taskCard h3 {
+    font-size: 14px;
+  }
+
+  .taskCard p {
+    font-size: 12px;
+  }
+
+  .taskInput {
+    font-size: 16px;
+  }
+
+  .taskTextarea {
+    font-size: 13px;
+  }
+
+  .inputBar {
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .inputBar input {
+    font-size: 14px;
+  }
+
+  .addTasksButton {
+    font-size: 13px;
+  }
 }

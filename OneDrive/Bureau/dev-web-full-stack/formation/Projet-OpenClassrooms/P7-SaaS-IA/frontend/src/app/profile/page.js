@@ -36,7 +36,8 @@ export default function ProfilePage() {
   const [modeEdition, setModeEdition] = useState(false);
   const [motDePasseActuel, setMotDePasseActuel] = useState("");
   const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
-  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
+  const [afficherNouveauMotDePasse, setAfficherNouveauMotDePasse] =
+    useState(false);
 
   useEffect(() => {
     async function chargerProfil() {
@@ -97,6 +98,7 @@ export default function ProfilePage() {
 
       setMotDePasseActuel("");
       setNouveauMotDePasse("");
+      setAfficherNouveauMotDePasse(false);
       setModeEdition(false);
       setMessageSucces("Vos informations ont bien été modifiées.");
     } catch {
@@ -163,33 +165,15 @@ export default function ProfilePage() {
                 <div className={styles.field}>
                   <label htmlFor="currentPassword">Mot de passe actuel</label>
 
-                  <div className={styles.passwordWrapper}>
-                    <input
-                      id="currentPassword"
-                      type={afficherMotDePasse ? "text" : "password"}
-                      value={motDePasseActuel}
-                      onChange={(e) => setMotDePasseActuel(e.target.value)}
-                    />
-
-                    <button
-                      type="button"
-                      className={styles.eyeButton}
-                      onClick={() =>
-                        setAfficherMotDePasse(!afficherMotDePasse)
-                      }
-                      aria-label={
-                        afficherMotDePasse
-                          ? "Masquer le mot de passe"
-                          : "Afficher le mot de passe"
-                      }
-                    >
-                      {afficherMotDePasse ? (
-                        <EyeOff size={18} />
-                      ) : (
-                        <Eye size={18} />
-                      )}
-                    </button>
-                  </div>
+                  <input
+                    id="currentPassword"
+                    name="current-password-manual"
+                    type="password"
+                    value={motDePasseActuel}
+                    placeholder="Saisir votre mot de passe actuel"
+                    autoComplete="new-password"
+                    onChange={(e) => setMotDePasseActuel(e.target.value)}
+                  />
                 </div>
 
                 <div className={styles.field}>
@@ -198,8 +182,11 @@ export default function ProfilePage() {
                   <div className={styles.passwordWrapper}>
                     <input
                       id="newPassword"
-                      type={afficherMotDePasse ? "text" : "password"}
+                      name="new-password"
+                      type={afficherNouveauMotDePasse ? "text" : "password"}
                       value={nouveauMotDePasse}
+                      placeholder="Saisir un nouveau mot de passe"
+                      autoComplete="new-password"
                       onChange={(e) => setNouveauMotDePasse(e.target.value)}
                     />
 
@@ -207,15 +194,17 @@ export default function ProfilePage() {
                       type="button"
                       className={styles.eyeButton}
                       onClick={() =>
-                        setAfficherMotDePasse(!afficherMotDePasse)
+                        setAfficherNouveauMotDePasse(
+                          !afficherNouveauMotDePasse
+                        )
                       }
                       aria-label={
-                        afficherMotDePasse
-                          ? "Masquer le mot de passe"
-                          : "Afficher le mot de passe"
+                        afficherNouveauMotDePasse
+                          ? "Masquer le nouveau mot de passe"
+                          : "Afficher le nouveau mot de passe"
                       }
                     >
-                      {afficherMotDePasse ? (
+                      {afficherNouveauMotDePasse ? (
                         <EyeOff size={18} />
                       ) : (
                         <Eye size={18} />
@@ -231,13 +220,19 @@ export default function ProfilePage() {
               </>
             ) : (
               <div className={styles.field}>
-                <label htmlFor="password">Mot de passe</label>
+                <label>Mot de passe</label>
+
                 <input
-                  id="password"
                   type="password"
-                  value="************"
+                  value=""
+                  placeholder="Mot de passe non affiché"
                   readOnly
                 />
+
+                <p className={styles.passwordHint}>
+                  Pour modifier votre mot de passe, cliquez sur “Modifier les
+                  informations”.
+                </p>
               </div>
             )}
 
@@ -258,6 +253,9 @@ export default function ProfilePage() {
                 } else {
                   setErreurFormulaire("");
                   setMessageSucces("");
+                  setMotDePasseActuel("");
+                  setNouveauMotDePasse("");
+                  setAfficherNouveauMotDePasse(false);
                   setModeEdition(true);
                 }
               }}

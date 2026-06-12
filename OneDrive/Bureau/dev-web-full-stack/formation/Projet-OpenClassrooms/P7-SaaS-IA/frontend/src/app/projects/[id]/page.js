@@ -12,6 +12,7 @@ import AITaskModal from "@/components/AITaskModal";
 import { recupererProjetParId } from "@/services/projectService";
 import { recupererTachesProjet, supprimerTache } from "@/services/taskService";
 import { creerCommentaire } from "@/services/commentService";
+import { recupererProfil } from "@/services/authService";
 
 import styles from "./projectDetail.module.css";
 
@@ -21,6 +22,7 @@ export default function ProjectDetailPage() {
 
   const [taches, setTaches] = useState([]);
   const [projet, setProjet] = useState(null);
+  const [utilisateurConnecte, setUtilisateurConnecte] = useState(null);
   const [chargement, setChargement] = useState(true);
 
   const [rechercheTache, setRechercheTache] = useState("");
@@ -40,6 +42,7 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     async function chargerProjetEtTaches() {
       try {
+        const profil = await recupererProfil();
         const projetApi = await recupererProjetParId(id);
 
         if (!projetApi.userRole) {
@@ -49,6 +52,7 @@ export default function ProjectDetailPage() {
 
         const tachesApi = await recupererTachesProjet(id);
 
+        setUtilisateurConnecte(profil.user || profil);
         setProjet(projetApi);
         setTaches(tachesApi);
       } catch {
@@ -122,6 +126,28 @@ export default function ProjectDetailPage() {
       .join("")
       .slice(0, 2)
       .toUpperCase();
+  }
+
+  function formaterDateCommentaire(date) {
+    return new Date(date).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  function utilisateurEstAssigne(tache) {
+    return tache.assignees?.some(
+      (assignation) => assignation.user.id === utilisateurConnecte?.id
+    );
+  }
+
+  function utilisateurPeutModifierOuSupprimerTache(tache) {
+    const estAdmin = projet?.userRole === "ADMIN";
+    const estAssigne = utilisateurEstAssigne(tache);
+
+    return estAdmin || estAssigne;
   }
 
   function toggleCommentaires(taskId) {
@@ -205,8 +231,14 @@ export default function ProjectDetailPage() {
 
       return correspondRecherche && correspondStatut;
     })
-    
-    .sort((a, b) => {
+   .sort((a, b) => {
+  const aEstAssignee = utilisateurEstAssigne(a);
+  const bEstAssignee = utilisateurEstAssigne(b);
+
+  if (aEstAssignee !== bEstAssignee) {
+    return aEstAssignee ? -1 : 1;
+  }
+
   const ordreStatuts = {
     TODO: 1,
     IN_PROGRESS: 2,
@@ -227,10 +259,14 @@ export default function ProjectDetailPage() {
   return dateA - dateB;
 });
 
-  // Vue calendrier simplifiée :
-  // les tâches filtrées sont regroupées par date d'échéance.
-  // Cela permet d'avoir une vision planning sans ajouter de librairie externe.
-  const tachesParDate = tachesFiltrees.reduce((acc, tache) => {
+  const tachesCalendrier = tachesFiltrees.filter((tache) => {
+  const estAssignee = utilisateurEstAssigne(tache);
+  const estTerminee = tache.status === "DONE";
+
+  return estAssignee && !estTerminee;
+});
+
+  const tachesParDate = tachesCalendrier.reduce((acc, tache) => {
     const date = tache.dueDate
       ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
           day: "numeric",
@@ -249,8 +285,16 @@ export default function ProjectDetailPage() {
   }, {});
 
   function afficherTacheListe(tache) {
+    const peutModifierOuSupprimer =
+      utilisateurPeutModifierOuSupprimerTache(tache);
+
     return (
-      <div key={tache.id} className={styles.taskCard}>
+      <div
+        key={tache.id}
+        className={`${styles.taskCard} ${
+        utilisateurEstAssigne(tache) ? styles.maTache : ""
+      }`}
+>
         <div className={styles.taskTop}>
           <div>
             <h3>{tache.title}</h3>
@@ -260,7 +304,7 @@ export default function ProjectDetailPage() {
             </span>
           </div>
 
-          {peutGererTaches && (
+          {peutModifierOuSupprimer && (
             <div className={styles.taskMenuWrapper}>
               <button
                 type="button"
@@ -345,9 +389,15 @@ export default function ProjectDetailPage() {
             {tache.comments?.length > 0 ? (
               tache.comments.map((commentaire) => (
                 <div key={commentaire.id} className={styles.commentItem}>
-                  <p className={styles.commentAuthor}>
-                    {commentaire.author.name}
-                  </p>
+                  <div className={styles.commentHeader}>
+                    <p className={styles.commentAuthor}>
+                      {commentaire.author.name}
+                    </p>
+
+                    <span className={styles.commentDate}>
+                      {formaterDateCommentaire(commentaire.createdAt)}
+                    </span>
+                  </div>
 
                   <p className={styles.commentText}>{commentaire.content}</p>
                 </div>
@@ -384,18 +434,26 @@ export default function ProjectDetailPage() {
     );
   }
 
-  function afficherTacheCalendrier(tache) {
-    return (
-      <div key={tache.id} className={styles.calendarTask}>
+ function afficherTacheCalendrier(tache) {
+  return (
+    <div
+      key={tache.id}
+      className={`${styles.calendarTask} ${
+        utilisateurEstAssigne(tache) ? styles.maTacheCalendrier : ""
+      }`}
+    >
+      <div>
         <strong>{tache.title}</strong>
 
-        <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
-          {traduireStatut(tache.status)}
-        </span>
+        
       </div>
-    );
-  }
 
+      <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
+        {traduireStatut(tache.status)}
+      </span>
+    </div>
+  );
+}
   return (
     <div className={styles.page}>
       <Header />
@@ -468,17 +526,11 @@ export default function ProjectDetailPage() {
             </div>
 
             <div className={styles.filters}>
-              <button
-                type="button"
-                onClick={() => setVueActive("liste")}
-              >
+              <button type="button" onClick={() => setVueActive("liste")}>
                 Liste
               </button>
 
-              <button
-                type="button"
-                onClick={() => setVueActive("calendrier")}
-              >
+              <button type="button" onClick={() => setVueActive("calendrier")}>
                 Calendrier
               </button>
 
@@ -501,7 +553,9 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {tachesFiltrees.length === 0 ? (
+          {vueActive === "calendrier" && tachesCalendrier.length === 0 ? (
+            <p>Aucune tâche à venir ne vous est assignée.</p>
+           ) : tachesFiltrees.length === 0 ? (
             <p>Aucune tâche ne correspond à votre recherche.</p>
           ) : vueActive === "liste" ? (
             tachesFiltrees.map(afficherTacheListe)

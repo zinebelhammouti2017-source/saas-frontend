@@ -61,6 +61,10 @@
   padding: 28px 28px 22px;
 }
 
+.monProjet {
+  border-left: 4px solid #d85a00;
+}
+
 .title {
   font-size: 16px;
   font-weight: 600;
@@ -199,4 +203,85 @@
 
 .deleteAction {
   color: #dc2626;
+}
+
+@media (max-width: 1024px) {
+  .main {
+    max-width: none;
+    padding: 50px 24px 70px;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 40px 20px 60px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+    margin-bottom: 36px;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    min-height: auto;
+  }
+
+  .monProjet {
+  border-left: 4px solid #d85a00;
+  }
+
+  .teamMembers {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 32px 16px 48px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+  }
+
+  .header p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .card {
+    padding: 24px 20px 20px;
+  }
+
+  .monProjet {
+  border-left: 4px solid #d85a00;
+  }
+
+  .title {
+    padding-right: 34px;
+    line-height: 1.4;
+  }
+
+  .projectMenu {
+    right: 0;
+  }
 }

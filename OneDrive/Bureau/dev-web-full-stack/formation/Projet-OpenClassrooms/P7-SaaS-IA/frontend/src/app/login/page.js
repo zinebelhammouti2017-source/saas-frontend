@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import styles from "../auth.module.css";
 import { connecterUtilisateur } from "@/services/authService";
 
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [motDePasse, setMotDePasse] = useState("");
   const [messageErreur, setMessageErreur] = useState("");
   const [messageSucces, setMessageSucces] = useState("");
+  const [afficherMotDePasse, setAfficherMotDePasse] = useState(false);
 
   async function gererConnexion(e) {
     e.preventDefault();
@@ -57,12 +59,28 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
           />
 
+         <div className={styles.passwordWrapper}>
           <input
-            type="password"
+            type={afficherMotDePasse ? "text" : "password"}
             placeholder="Mot de passe"
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
           />
+
+          <button
+            type="button"
+            className={styles.eyeButton}
+            onClick={() =>
+            setAfficherMotDePasse(!afficherMotDePasse)
+            }
+          >
+            {afficherMotDePasse ? (
+              <EyeOff size={18} />
+            ) : (
+              <Eye size={18} />
+            )}
+          </button>
+         </div>
 
           <button type="submit">Se connecter</button>
         </form>

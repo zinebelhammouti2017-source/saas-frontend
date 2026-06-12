@@ -28,7 +28,8 @@ export default function TaskModal({
   const utilisateursDisponibles =
     projet?.members?.map((membre) => membre.user) || [];
 
-  function ajouterAssigne(idUtilisateur) {
+ 
+    function ajouterAssigne(idUtilisateur) {
     const utilisateur = utilisateursDisponibles.find(
       (user) => user.id === idUtilisateur
     );

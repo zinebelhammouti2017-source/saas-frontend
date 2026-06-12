@@ -10,7 +10,6 @@ export default function AITaskModal({ projectId, onClose, onTachesCreees }) {
   function genererTaches() {
     if (!description.trim()) return;
 
-    // Génération locale simulée : cette partie pourra être remplacée plus tard par une vraie API IA.
     const nouvellesTaches = [
       {
         id: crypto.randomUUID(),
@@ -39,23 +38,14 @@ export default function AITaskModal({ projectId, onClose, onTachesCreees }) {
 
   function modifierTacheGeneree(idTache, champ, valeur) {
     setTachesGenerees(
-      tachesGenerees.map((tache) => {
-        if (tache.id === idTache) {
-          return {
-            ...tache,
-            [champ]: valeur,
-          };
-        }
-
-        return tache;
-      })
+      tachesGenerees.map((tache) =>
+        tache.id === idTache ? { ...tache, [champ]: valeur } : tache
+      )
     );
   }
 
   function supprimerTacheGeneree(idTache) {
-    setTachesGenerees(
-      tachesGenerees.filter((tache) => tache.id !== idTache)
-    );
+    setTachesGenerees(tachesGenerees.filter((tache) => tache.id !== idTache));
   }
 
   async function ajouterTachesAuProjet() {
@@ -88,83 +78,85 @@ export default function AITaskModal({ projectId, onClose, onTachesCreees }) {
 
         <h2>✦ Vos tâches...</h2>
 
-        {tachesGenerees.length > 0 && (
-          <div className={styles.generatedTasks}>
-            {tachesGenerees.map((tache) => (
-              <div key={tache.id} className={styles.taskCard}>
-                {tacheEnEdition === tache.id ? (
-                  <>
-                    <input
-                      type="text"
-                      value={tache.titre}
-                      onChange={(e) =>
-                        modifierTacheGeneree(
-                          tache.id,
-                          "titre",
-                          e.target.value
-                        )
-                      }
-                      className={styles.taskInput}
-                    />
+        <div className={styles.content}>
+          {tachesGenerees.length > 0 && (
+            <div className={styles.generatedTasks}>
+              {tachesGenerees.map((tache) => (
+                <div key={tache.id} className={styles.taskCard}>
+                  {tacheEnEdition === tache.id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={tache.titre}
+                        onChange={(e) =>
+                          modifierTacheGeneree(
+                            tache.id,
+                            "titre",
+                            e.target.value
+                          )
+                        }
+                        className={styles.taskInput}
+                      />
 
-                    <textarea
-                      value={tache.description}
-                      onChange={(e) =>
-                        modifierTacheGeneree(
-                          tache.id,
-                          "description",
-                          e.target.value
-                        )
-                      }
-                      className={styles.taskTextarea}
-                    />
-
-                    <button
-                      type="button"
-                      className={styles.saveEditButton}
-                      onClick={() => setTacheEnEdition(null)}
-                    >
-                      Valider
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <h3>{tache.titre}</h3>
-                    <p>{tache.description}</p>
-
-                    <div className={styles.taskActions}>
-                      <button
-                        type="button"
-                        onClick={() => supprimerTacheGeneree(tache.id)}
-                      >
-                        Supprimer
-                      </button>
-
-                      <span>|</span>
+                      <textarea
+                        value={tache.description}
+                        onChange={(e) =>
+                          modifierTacheGeneree(
+                            tache.id,
+                            "description",
+                            e.target.value
+                          )
+                        }
+                        className={styles.taskTextarea}
+                      />
 
                       <button
                         type="button"
-                        onClick={() => setTacheEnEdition(tache.id)}
+                        className={styles.saveEditButton}
+                        onClick={() => setTacheEnEdition(null)}
                       >
-                        Modifier
+                        Valider
                       </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                    </>
+                  ) : (
+                    <>
+                      <h3>{tache.titre}</h3>
+                      <p>{tache.description}</p>
 
-        {tachesGenerees.length > 0 && (
-          <button
-            type="button"
-            className={styles.addTasksButton}
-            onClick={ajouterTachesAuProjet}
-          >
-            + Ajouter les tâches
-          </button>
-        )}
+                      <div className={styles.taskActions}>
+                        <button
+                          type="button"
+                          onClick={() => supprimerTacheGeneree(tache.id)}
+                        >
+                          Supprimer
+                        </button>
+
+                        <span>|</span>
+
+                        <button
+                          type="button"
+                          onClick={() => setTacheEnEdition(tache.id)}
+                        >
+                          Modifier
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {tachesGenerees.length > 0 && (
+            <button
+              type="button"
+              className={styles.addTasksButton}
+              onClick={ajouterTachesAuProjet}
+            >
+              + Ajouter les tâches
+            </button>
+          )}
+        </div>
 
         <div className={styles.inputBar}>
           <input

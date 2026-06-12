@@ -153,6 +153,10 @@
   margin-bottom: 18px;
 }
 
+.maTache {
+  border-left: 4px solid #d85a00;
+  }
+
 .taskCard h3 {
   display: inline-block;
   margin: 0 8px 8px 0;
@@ -173,6 +177,8 @@
   font-size: 12px;
   color: #6b7280;
 }
+
+
 
 .assignees {
   display: flex;
@@ -399,25 +405,298 @@
 }
 
 .calendarSection {
-  margin-bottom: 32px;
+  margin-bottom: 34px;
 }
 
 .calendarDate {
-  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 14px;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 700;
+  color: #111111;
 }
 
 .calendarTask {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 18px;
 
-  padding: 12px;
-  margin-bottom: 8px;
+  padding: 18px 20px;
+  margin-bottom: 12px;
 
   border: 1px solid #ececec;
-  border-radius: 8px;
+  border-radius: 12px;
 
   background: #ffffff;
+}
+
+.calendarTask strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+  color: #111111;
+}
+
+.calendarTaskMeta {
+  margin: 0;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.maTacheCalendrier {
+  border-left: 4px solid #d85a00;
+  background-color: #fffaf5;
+}
+
+
+
+
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.commentDate {
+  font-size: 11px;
+  color: #8b95a1;
+  white-space: nowrap;
+}
+
+
+
+@media (max-width: 1024px) {
+  .main {
+    max-width: none;
+    padding: 40px 24px 64px;
+  }
+
+  .tasks {
+    padding: 28px;
+  }
+
+  .tasksHeader {
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .filters {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 32px 20px 56px;
+  }
+
+  .top {
+    grid-template-columns: 42px 1fr;
+  }
+
+  .titleBlock h1 {
+    word-break: break-word;
+    line-height: 1.3;
+  }
+
+  .actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .taskButton,
+  .aiButton {
+    flex: 1;
+  }
+
+  .contributors {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px;
+    overflow: hidden;
+  }
+
+  .users {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .tasks {
+    padding: 24px;
+  }
+
+  .tasksHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .filters input,
+  .filters select {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .taskCard {
+    padding: 20px;
+  }
+
+  .maTache {
+  border-left: 4px solid #d85a00;
+  }
+
+  .taskTop {
+    gap: 12px;
+  }
+
+  .assignees {
+    align-items: flex-start;
+  }
+
+  .commentForm {
+    flex-direction: column;
+  }
+
+  .commentForm button {
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 28px 16px 48px;
+  }
+
+  .titleBlock h1 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .titleBlock p {
+    line-height: 1.5;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .taskButton,
+  .aiButton {
+    width: 100%;
+  }
+
+  .contributors {
+    padding: 18px 16px;
+  }
+
+  .userCard {
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .memberName {
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .tasks {
+    padding: 18px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .filters button,
+  .filters select,
+  .filters input {
+    width: 100%;
+  }
+
+  .taskTop {
+    align-items: flex-start;
+  }
+
+  .taskCard h3 {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .moreButton {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .assignees p {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .calendarTask {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .top,
+  .contributors,
+  .tasks {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .titleBlock {
+    min-width: 0;
+  }
+
+  .titleBlock h1,
+  .titleBlock p {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .contributors {
+    overflow: hidden;
+  }
+
+  .users {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .userCard {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .memberName {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }

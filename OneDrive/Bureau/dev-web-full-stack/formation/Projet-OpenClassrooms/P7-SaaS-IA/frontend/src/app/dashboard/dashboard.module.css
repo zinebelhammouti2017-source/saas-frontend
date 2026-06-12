@@ -160,14 +160,20 @@
 /* Cartes */
 .card {
   width: 100%;
-  min-height: 190px;
+  height: 260px; /* hauteur fixe identique */
   padding: 24px;
   margin-bottom: 18px;
   box-sizing: border-box;
+
   background-color: #ffffff;
   border: 1px solid #eee3dc;
   border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
 }
+
+
 
 .card:last-child {
   margin-bottom: 0;
@@ -190,27 +196,66 @@
 }
 
 .description {
-  min-height: 40px;
   margin: 0 0 20px;
+
   color: #6b7280;
   font-size: 13px;
   line-height: 1.5;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  min-height: 58px;
+  max-height: 58px;
 }
 
 .meta {
-  display: grid;
-  grid-template-columns: 1.3fr 0.9fr 1fr;
-  gap: 14px;
+  margin-top: auto;
+
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+
   color: #8b95a1;
   font-size: 12px;
+
+  min-height: 42px;
 }
 
 .meta span {
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  min-width: 0;
+
   line-height: 1.35;
+}
+
+.meta svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+
+  margin-top: 2px;
+
+  color: #8b95a1;
+  stroke-width: 2;
+}
+
+.projectMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.dateMeta {
+  min-width: 100px;
+}
+
+.commentMeta {
+  min-width: 110px;
 }
 
 .badge {
@@ -242,3 +287,126 @@
 .emptyText {
   color: #6b7280;
 }
+
+@media (max-width: 1024px) {
+  .main {
+    padding: 32px 24px;
+  }
+
+  .columns {
+    gap: 20px;
+  }
+
+  .column {
+    padding: 18px;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .meta svg {
+  flex-shrink: 0;
+  color: #8b95a1;
+  stroke-width: 2;
+}
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 32px 20px;
+  }
+
+  .top {
+    flex-direction: column;
+    gap: 22px;
+    margin-bottom: 28px;
+  }
+
+  .top h1 {
+    font-size: 28px;
+  }
+
+  .createButton {
+    width: 100%;
+    padding: 14px 18px;
+  }
+
+  .viewSwitcher {
+    width: 100%;
+  }
+
+  .switchButton {
+    flex: 1;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .column {
+    min-height: auto;
+  }
+
+  .card {
+    height: auto;
+    min-height: 220px;
+  }
+
+  .description {
+    height: auto;
+  }
+
+  .tasksPanel {
+    padding: 24px;
+  }
+
+  .tasksPanelHeader {
+    flex-direction: column;
+  }
+
+  .searchInput {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding: 28px 16px;
+  }
+
+  .top h1 {
+    font-size: 26px;
+  }
+
+  .top p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .card {
+    padding: 20px;
+  }
+
+  .cardHeader {
+    gap: 10px;
+  }
+
+  .meta {
+    grid-template-columns: 1fr;
+  }
+
+  .meta svg {
+  flex-shrink: 0;
+  color: #8b95a1;
+  stroke-width: 2;
+}
+
+  .viewButton {
+    width: 100%;
+    margin-top: 22px;
+  }
+}
+

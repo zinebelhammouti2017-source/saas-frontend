@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProjectModal from "@/components/ProjectModal";
+import ConfirmModal from "@/components/ConfirmModal";
+
 import { recupererToken } from "@/utils/cookies";
 import { recupererProfil } from "@/services/authService";
 import { recupererTachesProjet } from "@/services/taskService";
 import { recupererProjets, supprimerProjet } from "@/services/projectService";
-import ConfirmModal from "@/components/ConfirmModal";
+
 import styles from "./projects.module.css";
 
 export default function ProjectsPage() {
@@ -37,32 +40,12 @@ export default function ProjectsPage() {
         const profil = await recupererProfil();
         const projetsApi = await recupererProjets();
 
-// Pour chaque projet, on récupère ses tâches afin de calculer sa progression réelle.
-const projetsAvecProgression = await Promise.all(
-  projetsApi.map(async (projet) => {
-    const tachesProjet = await recupererTachesProjet(projet.id);
+        const projetsAvecProgression = await calculerProgressionProjets(
+          projetsApi
+        );
 
-    const totalTaches = tachesProjet.length;
-    const tachesTerminees = tachesProjet.filter(
-      (tache) => tache.status === "DONE"
-    ).length;
-
-    const progression =
-      totalTaches === 0
-        ? 0
-        : Math.round((tachesTerminees / totalTaches) * 100);
-
-    return {
-      ...projet,
-      totalTaches,
-      tachesTerminees,
-      progression,
-    };
-  })
-);
-
-setUtilisateurConnecte(profil);
-setProjets(projetsAvecProgression);
+        setUtilisateurConnecte(profil);
+        setProjets(projetsAvecProgression);
       } catch {
         setErreur("Impossible de charger les projets.");
       } finally {
@@ -87,35 +70,40 @@ setProjets(projetsAvecProgression);
     };
   }, []);
 
+  async function calculerProgressionProjets(projetsApi) {
+    const projetsAvecProgression = await Promise.all(
+      projetsApi.map(async (projet) => {
+        const tachesProjet = await recupererTachesProjet(projet.id);
+
+        const totalTaches = tachesProjet.length;
+
+        const tachesTerminees = tachesProjet.filter(
+          (tache) => tache.status === "DONE"
+        ).length;
+
+        const progression =
+          totalTaches === 0
+            ? 0
+            : Math.round((tachesTerminees / totalTaches) * 100);
+
+        return {
+          ...projet,
+          totalTaches,
+          tachesTerminees,
+          progression,
+        };
+      })
+    );
+
+    return projetsAvecProgression;
+  }
+
   async function actualiserProjets() {
-  const projetsApi = await recupererProjets();
+    const projetsApi = await recupererProjets();
+    const projetsAvecProgression = await calculerProgressionProjets(projetsApi);
 
-  const projetsAvecProgression = await Promise.all(
-    projetsApi.map(async (projet) => {
-      const tachesProjet = await recupererTachesProjet(projet.id);
-
-      const totalTaches = tachesProjet.length;
-
-      const tachesTerminees = tachesProjet.filter(
-        (tache) => tache.status === "DONE"
-      ).length;
-
-      const progression =
-        totalTaches === 0
-          ? 0
-          : Math.round((tachesTerminees / totalTaches) * 100);
-
-      return {
-        ...projet,
-        totalTaches,
-        tachesTerminees,
-        progression,
-      };
-    })
-  );
-
-  setProjets(projetsAvecProgression);
-}
+    setProjets(projetsAvecProgression);
+  }
 
   function obtenirInitiales(nom) {
     if (!nom) return "?";
@@ -145,6 +133,33 @@ setProjets(projetsAvecProgression);
     setProjetAModifier(null);
   }
 
+  async function gererSuppressionProjet() {
+    if (!projetASupprimer) return;
+
+    try {
+      await supprimerProjet(projetASupprimer.id);
+      await actualiserProjets();
+      setProjetASupprimer(null);
+    } catch {
+      setErreur("Impossible de supprimer le projet.");
+    }
+  }
+
+  function utilisateurEstOwner(projet) {
+    return projet.ownerId === utilisateurConnecte?.user?.id;
+  }
+
+  const projetsTries = [...projets].sort((a, b) => {
+    const aEstOwner = utilisateurEstOwner(a);
+    const bEstOwner = utilisateurEstOwner(b);
+
+    if (aEstOwner !== bEstOwner) {
+      return aEstOwner ? -1 : 1;
+    }
+
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   if (chargement) {
     return <p>Chargement des projets...</p>;
   }
@@ -152,18 +167,6 @@ setProjets(projetsAvecProgression);
   if (erreur) {
     return <p>{erreur}</p>;
   }
-
-  async function gererSuppressionProjet() {
-  if (!projetASupprimer) return;
-
-  try {
-    await supprimerProjet(projetASupprimer.id);
-    await actualiserProjets();
-    setProjetASupprimer(null);
-  } catch {
-    setErreur("Impossible de supprimer le projet.");
-  }
-}
 
   return (
     <div className={styles.page}>
@@ -185,15 +188,15 @@ setProjets(projetsAvecProgression);
           <p className={styles.empty}>Aucun projet pour le moment</p>
         ) : (
           <div className={styles.grid}>
-            {projets.map((projet) => {
-              const estOwner = projet.ownerId === utilisateurConnecte?.user?.id;
-              console.log("Utilisateur connecté :", utilisateurConnecte);
-              console.log("Owner projet :", projet.ownerId);
+            {projetsTries.map((projet) => {
+              const estOwner = utilisateurEstOwner(projet);
 
               return (
                 <div
                   key={projet.id}
-                  className={styles.card}
+                  className={`${styles.card} ${
+                    estOwner ? styles.monProjet : ""
+                  }`}
                   onClick={() => router.push(`/projects/${projet.id}`)}
                 >
                   {estOwner && (
@@ -213,49 +216,53 @@ setProjets(projetsAvecProgression);
 
                       {menuOuvert === projet.id && (
                         <div className={styles.projectMenu}>
-  <button
-    type="button"
-    onClick={(e) => ouvrirModificationProjet(e, projet)}
-  >
-    Modifier
-  </button>
+                          <button
+                            type="button"
+                            onClick={(e) => ouvrirModificationProjet(e, projet)}
+                          >
+                            Modifier
+                          </button>
 
-  <button
-    type="button"
-    className={styles.deleteAction}
-    onClick={(e) => {
-      e.stopPropagation();
-      setProjetASupprimer(projet);
-      setMenuOuvert(null);
-    }}
-  >
-    Supprimer
-  </button>
-</div>
+                          <button
+                            type="button"
+                            className={styles.deleteAction}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setProjetASupprimer(projet);
+                              setMenuOuvert(null);
+                            }}
+                          >
+                            Supprimer
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}
 
                   <h2 className={styles.title}>{projet.name}</h2>
+
                   <p className={styles.description}>{projet.description}</p>
 
                   <div className={styles.progressSection}>
                     <div className={styles.progressHeader}>
-                       <span>Progression</span>
+                      <span>Progression</span>
                       <span>{projet.progression}%</span>
                     </div>
 
                     <div className={styles.progressBar}>
                       <div
                         className={`${styles.progressFill} ${
-                        projet.progression === 100 ? styles.progressCompleted : ""
-                       }`}
+                          projet.progression === 100
+                            ? styles.progressCompleted
+                            : ""
+                        }`}
                         style={{ width: `${projet.progression}%` }}
-                     ></div>
+                      ></div>
                     </div>
 
                     <p className={styles.progressText}>
-                       {projet.tachesTerminees}/{projet.totalTaches} tâches terminées
+                      {projet.tachesTerminees}/{projet.totalTaches} tâches
+                      terminées
                     </p>
                   </div>
 
@@ -265,8 +272,10 @@ setProjets(projetsAvecProgression);
                     </p>
 
                     <div className={styles.teamMembers}>
-                      <span className={`${styles.avatar} ${styles.ownerAvatar}`}>
-                         {obtenirInitiales(projet.owner?.name)}
+                      <span
+                        className={`${styles.avatar} ${styles.ownerAvatar}`}
+                      >
+                        {obtenirInitiales(projet.owner?.name)}
                       </span>
 
                       <span className={styles.role}>Propriétaire</span>
@@ -296,13 +305,13 @@ setProjets(projetsAvecProgression);
       )}
 
       {projetASupprimer && (
-  <ConfirmModal
-    title="Supprimer le projet"
-    message={`Êtes-vous sûre de vouloir supprimer le projet "${projetASupprimer.name}" ? Cette action est définitive.`}
-    onCancel={() => setProjetASupprimer(null)}
-    onConfirm={gererSuppressionProjet}
-  />
-)}
+        <ConfirmModal
+          title="Supprimer le projet"
+          message={`Êtes-vous sûre de vouloir supprimer le projet "${projetASupprimer.name}" ? Cette action est définitive.`}
+          onCancel={() => setProjetASupprimer(null)}
+          onConfirm={gererSuppressionProjet}
+        />
+      )}
     </div>
   );
 }

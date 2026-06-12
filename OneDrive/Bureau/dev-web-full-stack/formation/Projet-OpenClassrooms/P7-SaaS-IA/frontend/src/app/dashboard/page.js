@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Folder, CalendarDays, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/Header";
@@ -100,22 +101,25 @@ export default function DashboardPage() {
         <p className={styles.description}>{tache.description}</p>
 
         <div className={styles.meta}>
-          <span>📁 {tache.project?.name || "Projet"}</span>
-
           <span>
-            📅{" "}
-            {tache.dueDate
-              ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })
-              : "Sans échéance"}
+             <Folder size={15} />
+              {tache.project?.name || "Projet"}
           </span>
 
           <span>
-            💬 {tache.comments?.length || 0} commentaire
-            {tache.comments?.length > 1 ? "s" : ""}
+             <CalendarDays size={15} />
+              {tache.dueDate
+              ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })
+                : "Sans échéance"}
+          </span>
+
+          <span>
+             <MessageSquare size={15} />
+             {tache.comments?.length || 0} 
           </span>
         </div>
 

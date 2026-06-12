@@ -167,3 +167,93 @@
   cursor: pointer;
   font-size: 14px;
 }
+
+/* =========================
+   TABLETTE
+========================= */
+@media (max-width: 768px) {
+  .overlay {
+    padding: 20px;
+  }
+
+  .modal {
+    max-width: 100%;
+    max-height: 90vh;
+    padding: 40px 28px;
+  }
+
+  .modal h2 {
+    font-size: 26px;
+    margin-bottom: 32px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 480px) {
+  .overlay {
+    padding: 16px;
+    align-items: center;
+  }
+  .modal {
+    width: 100%;
+    max-height: 92vh;
+
+    padding: 28px 20px;
+
+    border-radius: 16px;
+  }
+
+  .closeButton {
+    top: 16px;
+    right: 16px;
+
+    width: 36px;
+    height: 36px;
+
+    font-size: 24px;
+  }
+
+  .modal h2 {
+    font-size: 22px;
+    margin-bottom: 24px;
+    padding-right: 30px;
+  }
+
+  .form {
+    gap: 20px;
+  }
+
+  .field input,
+  .field select {
+    height: 50px;
+    font-size: 14px;
+  }
+
+  .submitButton {
+    width: 100%;
+    height: 48px;
+  }
+
+  .results {
+    max-height: 180px;
+    overflow-y: auto;
+  }
+
+  .selectedContributors {
+    gap: 6px;
+  }
+
+  .contributorTag {
+    max-width: 100%;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 768px) {
+  .closeButton {
+    top: 16px;
+    right: 16px;
+  }
+}
