@@ -9,6 +9,7 @@ import TaskModal from "@/components/TaskModal";
 import ConfirmModal from "@/components/ConfirmModal";
 import AITaskModal from "@/components/AITaskModal";
 import TaskCard from "@/components/TaskCard";
+import ProjectCalendarView from "@/components/ProjectCalendarView";
 
 import { recupererProjetParId } from "@/services/projectService";
 import { recupererTachesProjet, supprimerTache } from "@/services/taskService";
@@ -267,44 +268,6 @@ export default function ProjectDetailPage() {
   return estAssignee && !estTerminee;
 });
 
-  const tachesParDate = tachesCalendrier.reduce((acc, tache) => {
-    const date = tache.dueDate
-      ? new Date(tache.dueDate).toLocaleDateString("fr-FR", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        })
-      : "Sans échéance";
-
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-
-    acc[date].push(tache);
-
-    return acc;
-  }, {});
-
- function afficherTacheCalendrier(tache) {
-  return (
-    <div
-      key={tache.id}
-      className={`${styles.calendarTask} ${
-        utilisateurEstAssigne(tache) ? styles.maTacheCalendrier : ""
-      }`}
-    >
-      <div>
-        <strong>{tache.title}</strong>
-
-        
-      </div>
-
-      <span className={`${styles.badge} ${getClasseStatut(tache.status)}`}>
-        {traduireStatut(tache.status)}
-      </span>
-    </div>
-  );
-}
   return (
     <div className={styles.page}>
       <Header />
@@ -404,9 +367,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {vueActive === "calendrier" && tachesCalendrier.length === 0 ? (
-            <p>Aucune tâche à venir ne vous est assignée.</p>
-           ) : tachesFiltrees.length === 0 ? (
+          {vueActive === "liste" && tachesFiltrees.length === 0 ? (
             <p>Aucune tâche ne correspond à votre recherche.</p>
           ) : vueActive === "liste" ? (
             tachesFiltrees.map((tache) => (
@@ -435,13 +396,12 @@ export default function ProjectDetailPage() {
               />
             ))
           ) : (
-            Object.entries(tachesParDate).map(([date, tachesDate]) => (
-              <div key={date} className={styles.calendarSection}>
-                <h3 className={styles.calendarDate}>📅 {date}</h3>
-
-                {tachesDate.map(afficherTacheCalendrier)}
-              </div>
-            ))
+            <ProjectCalendarView
+              tachesCalendrier={tachesCalendrier}
+              utilisateurEstAssigne={utilisateurEstAssigne}
+              getClasseStatut={getClasseStatut}
+              traduireStatut={traduireStatut}
+            />
           )}
         </div>
       </main>
