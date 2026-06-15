@@ -87,7 +87,12 @@ export default function TaskModal({
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <button className={styles.closeButton} onClick={onClose}>
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="Fermer la modale"
+        >
           ×
         </button>
 
@@ -149,6 +154,7 @@ export default function TaskModal({
                     <button
                       type="button"
                       onClick={() => retirerAssigne(utilisateur.id)}
+                      aria-label={`Retirer ${utilisateur.name} des assignés`}
                     >
                       ×
                     </button>

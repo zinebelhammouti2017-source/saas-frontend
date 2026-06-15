@@ -52,7 +52,11 @@ export default function LoginPage() {
         </div>
 
         <form className={styles.form} onSubmit={gererConnexion}>
+          <label htmlFor="login-email" className={styles.srOnly}>
+            Email
+          </label>
           <input
+            id="login-email"
             type="email"
             placeholder="Email"
             value={email}
@@ -60,7 +64,11 @@ export default function LoginPage() {
           />
 
          <div className={styles.passwordWrapper}>
+          <label htmlFor="login-password" className={styles.srOnly}>
+            Mot de passe
+          </label>
           <input
+            id="login-password"
             type={afficherMotDePasse ? "text" : "password"}
             placeholder="Mot de passe"
             value={motDePasse}
@@ -72,6 +80,11 @@ export default function LoginPage() {
             className={styles.eyeButton}
             onClick={() =>
             setAfficherMotDePasse(!afficherMotDePasse)
+            }
+            aria-label={
+              afficherMotDePasse
+                ? "Masquer le mot de passe"
+                : "Afficher le mot de passe"
             }
           >
             {afficherMotDePasse ? (

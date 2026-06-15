@@ -199,7 +199,11 @@ export default function ProjectDetailPage() {
 
       <main className={styles.main}>
         <div className={styles.top}>
-          <button onClick={() => router.back()} className={styles.back}>
+          <button
+            onClick={() => router.back()}
+            className={styles.back}
+            aria-label="Retour à la page précédente"
+          >
             ←
           </button>
 
@@ -273,7 +277,11 @@ export default function ProjectDetailPage() {
                 Calendrier
               </button>
 
+              <label htmlFor="statutFiltre" className={styles.srOnly}>
+                Filtrer les tâches par statut
+              </label>
               <select
+                id="statutFiltre"
                 value={statutFiltre}
                 onChange={(e) => setStatutFiltre(e.target.value)}
               >

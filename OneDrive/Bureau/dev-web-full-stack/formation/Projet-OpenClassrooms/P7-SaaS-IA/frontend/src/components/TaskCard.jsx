@@ -44,6 +44,7 @@ export default function TaskCard({
               type="button"
               className={styles.moreButton}
               onClick={() => toggleMenuTache(tache.id)}
+              aria-label="Ouvrir le menu de la tâche"
             >
               ...
             </button>

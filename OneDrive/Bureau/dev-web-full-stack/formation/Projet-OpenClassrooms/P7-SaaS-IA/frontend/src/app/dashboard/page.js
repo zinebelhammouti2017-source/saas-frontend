@@ -222,7 +222,11 @@ export default function DashboardPage() {
                 <p>Par ordre de date</p>
               </div>
 
+              <label htmlFor="dashboard-search" className={styles.srOnly}>
+                Rechercher une tâche
+              </label>
               <input
+                id="dashboard-search"
                 type="search"
                 placeholder="Rechercher une tâche"
                 value={recherche}

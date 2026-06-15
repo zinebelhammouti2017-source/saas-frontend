@@ -220,9 +220,10 @@ export default function ProfilePage() {
               </>
             ) : (
               <div className={styles.field}>
-                <label>Mot de passe</label>
+                <label htmlFor="passwordPreview">Mot de passe</label>
 
                 <input
+                  id="passwordPreview"
                   type="password"
                   value=""
                   placeholder="Mot de passe non affiché"

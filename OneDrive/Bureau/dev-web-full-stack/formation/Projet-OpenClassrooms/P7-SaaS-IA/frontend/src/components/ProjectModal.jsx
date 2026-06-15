@@ -130,7 +130,12 @@ export default function ProjectModal({ onClose, onProjetCree, projetAModifier })
   return (
     <div className={styles.overlay}>
       <div className={styles.modal}>
-        <button type="button" className={styles.closeButton} onClick={onClose}>
+        <button
+          type="button"
+          className={styles.closeButton}
+          onClick={onClose}
+          aria-label="Fermer la modale"
+        >
           ×
         </button>
 
@@ -193,6 +198,7 @@ export default function ProjectModal({ onClose, onProjetCree, projetAModifier })
                     <button
                       type="button"
                       onClick={() => retirerContributeur(contributeur.email)}
+                      aria-label={`Retirer ${contributeur.name} des contributeurs`}
                     >
                       ×
                     </button>
