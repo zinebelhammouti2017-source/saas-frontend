@@ -451,10 +451,6 @@
   background-color: #fffaf5;
 }
 
-
-
-
-
 .commentHeader {
   display: flex;
   justify-content: space-between;
@@ -467,6 +463,18 @@
   font-size: 11px;
   color: #8b95a1;
   white-space: nowrap;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 

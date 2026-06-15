@@ -283,11 +283,20 @@ export default function ProjectDetailPage() {
                 <option value="DONE">Terminée</option>
               </select>
 
+              <label
+                 htmlFor="rechercheTache"
+                 className={styles.srOnly}
+               >
+                Rechercher une tâche
+              </label>
+
               <input
+                id="rechercheTache"
                 type="search"
                 placeholder="Rechercher une tâche"
                 value={rechercheTache}
                 onChange={(e) => setRechercheTache(e.target.value)}
+                className={styles.searchInput}
               />
             </div>
           </div>

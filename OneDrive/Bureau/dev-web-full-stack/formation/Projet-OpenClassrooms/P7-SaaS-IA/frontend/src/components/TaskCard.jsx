@@ -143,17 +143,25 @@ export default function TaskCard({
           )}
 
           <div className={styles.commentForm}>
-            <input
-              type="text"
-              placeholder="Ajouter un commentaire..."
-              value={nouveauxCommentaires[tache.id] || ""}
-              onChange={(e) =>
-                setNouveauxCommentaires({
-                  ...nouveauxCommentaires,
-                  [tache.id]: e.target.value,
-                })
-              }
-            />
+          <label
+            htmlFor={`commentaire-${tache.id}`}
+            className={styles.srOnly}
+          >
+            Ajouter un commentaire
+          </label>
+
+          <input
+             id={`commentaire-${tache.id}`}
+             type="text"
+             placeholder="Ajouter un commentaire..."
+             value={nouveauxCommentaires[tache.id] || ""}
+             onChange={(e) =>
+               setNouveauxCommentaires({
+               ...nouveauxCommentaires,
+               [tache.id]: e.target.value,
+              })
+             }
+          />
 
             <button
               type="button"

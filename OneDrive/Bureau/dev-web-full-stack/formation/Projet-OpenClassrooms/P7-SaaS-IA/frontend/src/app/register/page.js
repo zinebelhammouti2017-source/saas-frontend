@@ -41,8 +41,6 @@ export default function RegisterPage() {
         password: motDePasse,
       });
 
-      console.log("Inscription réussie :", reponse);
-
       setMessageSucces("Inscription réussie.");
       setNom("");
       setEmail("");
@@ -67,40 +65,52 @@ export default function RegisterPage() {
 
         <div className={styles.formContainer}>
           <form className={styles.form} onSubmit={gererInscription}>
+
+            <label htmlFor="nom" className={styles.srOnly}>
+             Nom
+            </label>
             <input
+              id="nom"
               type="text"
               placeholder="Nom"
               value={nom}
               onChange={(e) => setNom(e.target.value)}
             />
 
+            <label htmlFor="email" className={styles.srOnly}>
+             Email
+            </label>
             <input
+              id="email"
               type="email"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
 
+            <label htmlFor="password" className={styles.srOnly}>
+             Mot de passe
+            </label>
             <input
+              id="password"
               type="password"
               placeholder="Mot de passe"
               value={motDePasse}
               onChange={(e) => setMotDePasse(e.target.value)}
             />
-
-           
-             <div className={styles.passwordRules}>
+ 
+              <div className={styles.passwordRules}>
               <p>Votre mot de passe doit contenir :</p>
 
                <ul>
-    <li>8 caractères minimum</li>
-    <li>Une majuscule</li>
-    <li>Un chiffre</li>
-  </ul>
-</div>
+                <li>8 caractères minimum</li>
+                <li>Une majuscule</li>
+                <li>Un chiffre</li>
+               </ul>
+           </div>
            
 
-            <button type="submit" > S'inscrire </button>
+           <button type="submit">S’inscrire</button>
           </form>
 
           {messageErreur && (
