@@ -15,11 +15,16 @@ import { recupererProjetParId } from "@/services/projectService";
 import { recupererTachesProjet, supprimerTache } from "@/services/taskService";
 import { creerCommentaire } from "@/services/commentService";
 import { recupererProfil } from "@/services/authService";
+
 import {
-  formaterDateCommentaire,
-  obtenirInitiales,
   traduireStatut,
+  obtenirInitiales,
+  formaterDateCommentaire,
 } from "@/utils/taskUtils";
+import {
+  utilisateurEstAssigne,
+  utilisateurPeutModifierOuSupprimerTache,
+} from "@/utils/permissionsUtils";
 
 import styles from "./projectDetail.module.css";
 
@@ -104,19 +109,6 @@ export default function ProjectDetailPage() {
     }
   }
 
-  function utilisateurEstAssigne(tache) {
-    return tache.assignees?.some(
-      (assignation) => assignation.user.id === utilisateurConnecte?.id
-    );
-  }
-
-  function utilisateurPeutModifierOuSupprimerTache(tache) {
-    const estAdmin = projet?.userRole === "ADMIN";
-    const estAssigne = utilisateurEstAssigne(tache);
-
-    return estAdmin || estAssigne;
-  }
-
   function toggleCommentaires(taskId) {
     setCommentairesOuverts({
       ...commentairesOuverts,
@@ -198,40 +190,40 @@ export default function ProjectDetailPage() {
 
       return correspondRecherche && correspondStatut;
     })
-   .sort((a, b) => {
-  const aEstAssignee = utilisateurEstAssigne(a);
-  const bEstAssignee = utilisateurEstAssigne(b);
+    .sort((a, b) => {
+      const aEstAssignee = utilisateurEstAssigne(a, utilisateurConnecte);
+      const bEstAssignee = utilisateurEstAssigne(b, utilisateurConnecte);
 
-  if (aEstAssignee !== bEstAssignee) {
-    return aEstAssignee ? -1 : 1;
-  }
+      if (aEstAssignee !== bEstAssignee) {
+        return aEstAssignee ? -1 : 1;
+      }
 
-  const ordreStatuts = {
-    TODO: 1,
-    IN_PROGRESS: 2,
-    DONE: 3,
-    CANCELLED: 4,
-  };
+      const ordreStatuts = {
+        TODO: 1,
+        IN_PROGRESS: 2,
+        DONE: 3,
+        CANCELLED: 4,
+      };
 
-  const ordreStatutA = ordreStatuts[a.status] || 99;
-  const ordreStatutB = ordreStatuts[b.status] || 99;
+      const ordreStatutA = ordreStatuts[a.status] || 99;
+      const ordreStatutB = ordreStatuts[b.status] || 99;
 
-  if (ordreStatutA !== ordreStatutB) {
-    return ordreStatutA - ordreStatutB;
-  }
+      if (ordreStatutA !== ordreStatutB) {
+        return ordreStatutA - ordreStatutB;
+      }
 
-  const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-  const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      const dateA = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+      const dateB = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
 
-  return dateA - dateB;
-});
+      return dateA - dateB;
+    });
 
   const tachesCalendrier = tachesFiltrees.filter((tache) => {
-  const estAssignee = utilisateurEstAssigne(tache);
-  const estTerminee = tache.status === "DONE";
+    const estAssignee = utilisateurEstAssigne(tache, utilisateurConnecte);
+    const estTerminee = tache.status === "DONE";
 
-  return estAssignee && !estTerminee;
-});
+    return estAssignee && !estTerminee;
+  });
 
   return (
     <div className={styles.page}>
@@ -332,7 +324,7 @@ export default function ProjectDetailPage() {
             </div>
           </div>
 
-          {vueActive === "liste" && tachesFiltrees.length === 0 ? (
+          {tachesFiltrees.length === 0 ? (
             <p>Aucune tâche ne correspond à votre recherche.</p>
           ) : vueActive === "liste" ? (
             tachesFiltrees.map((tache) => (
@@ -343,9 +335,15 @@ export default function ProjectDetailPage() {
                 menuOuvert={menuOuvert}
                 commentairesOuverts={commentairesOuverts}
                 nouveauxCommentaires={nouveauxCommentaires}
-                utilisateurEstAssigne={utilisateurEstAssigne}
-                utilisateurPeutModifierOuSupprimerTache={
-                  utilisateurPeutModifierOuSupprimerTache
+                utilisateurEstAssigne={(tache) =>
+                  utilisateurEstAssigne(tache, utilisateurConnecte)
+                }
+                utilisateurPeutModifierOuSupprimerTache={(tache) =>
+                  utilisateurPeutModifierOuSupprimerTache(
+                    tache,
+                    projet,
+                    utilisateurConnecte
+                  )
                 }
                 getClasseStatut={getClasseStatut}
                 traduireStatut={traduireStatut}
@@ -363,7 +361,9 @@ export default function ProjectDetailPage() {
           ) : (
             <ProjectCalendarView
               tachesCalendrier={tachesCalendrier}
-              utilisateurEstAssigne={utilisateurEstAssigne}
+              utilisateurEstAssigne={(tache) =>
+                utilisateurEstAssigne(tache, utilisateurConnecte)
+              }
               getClasseStatut={getClasseStatut}
               traduireStatut={traduireStatut}
             />
